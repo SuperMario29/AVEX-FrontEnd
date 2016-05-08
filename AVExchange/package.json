@@ -1,0 +1,14 @@
+{
+  "name": "avex",
+  "version": "1.0.0",
+  "description": "sending data to mobile app",
+  "dependencies": {
+    "morgan": "*", "body-parser": "*", "express": "*",
+ "mongodb": "*", "jsonwebtoken": "*",   },
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
