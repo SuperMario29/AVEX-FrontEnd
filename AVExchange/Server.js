@@ -319,7 +319,6 @@ apiRoutes.get('/getCustomerCards', routes.getcustomercards);
 apiRoutes.get('/validateBankAccount', routes.validatebankaccount);
 
 apiRoutes.post('/updatePassword', routes.updatepass);
-apiRoutes.post('/resetPassword', routes.resetpass);
 apiRoutes.post('/cancelOrder', routes.cancelorder);
 apiRoutes.post('/updateOrder', routes.updateorder);
 apiRoutes.post('/submitOrder', routes.submitorder);
