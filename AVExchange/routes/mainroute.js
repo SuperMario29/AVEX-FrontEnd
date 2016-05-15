@@ -12,6 +12,7 @@ var athletes = mongoose.model('athletes',Schema);
 var teams = mongoose.model('teams',Schema);
 var orders = mongoose.model('orders',Schema);
 var markettrends = mongoose.model('markettrends',Schema);
+var datastore = mongoose.model('datastore',Schema);
 var settings = mongoose.model('settings',Schema);
 var querystring = require('querystring');
 var https = require('https');
@@ -21,7 +22,7 @@ var username = '*****';
 var password = '*****';
 var sessionId = null;
 //create reusable transporter object using the default SMTP transport
-var transporter = nodemailer.createTransport('smtps://user%40gmail.com:pass@smtp.gmail.com');
+var transporter = nodemailer.createTransport('smtps://pierredbush%40gmail.com:pass@smtp.gmail.com');
 
 exports.main = function (req,res)
 {
@@ -214,7 +215,7 @@ exports.market = function(req,res){
 exports.search = function(req,res){
 	//find athlete with name using like
     console.log('Get Search');
-	athletes.find({name:  { $regex: new RegExp("^"+req.query.search.replace("+"," "), "i") } }, function(err, athlete) {
+	athletes.find({$or: [{name:  { $regex: new RegExp("^"+req.query.search.replace("+"," "), "i") }}, {firstname:  { $regex: new RegExp("^"+req.query.search.replace("+"," "), "i") }}, {lastname:  { $regex: new RegExp("^"+req.query.search.replace("+"," "), "i") }} ] }, function(err, athlete) {
 			if (err) {throw err;}
 			if (!athlete) {
 			    console.log('Nothing was found');

@@ -45,9 +45,10 @@ var apiRoutes = express.Router();
 var server = http.createServer(app);
 var customers = mongoose.model('customers');
 var settings = mongoose.model('settings');
+var datastore = mongoose.model('datastore',Schema);
 
 // create reusable transporter object using the default SMTP transport
-var transporter = nodemailer.createTransport('smtps://user%40gmail.com:pass@smtp.gmail.com');
+var transporter = nodemailer.createTransport('smtps://pierredbush%40gmail.com:pass@smtp.gmail.com');
 
 //basic route (http://localhost:8080)
 app.get('/', function(req, res) {
@@ -96,6 +97,17 @@ app.post('/submitRegistration', function(req, res) {
 								res.json({ success: false, message: 'User Save Failed.' });
 							} else if (success) {
 								console.log('Customer saved successfully');
+								
+								var data = new datastore({ 
+									description: 'New Customer Created: ' + user.name,
+						    	    actiontype: 'New Customer',
+						    	    recordstatusdate: new Date(),
+						    	    recordstatus: 1 
+								});
+									
+								data.save(function(err) {
+									if (err) {throw err;}	
+								});
 					
 						    	// setup e-mail data with unicode symbols
 						    	var mailOptions = {
