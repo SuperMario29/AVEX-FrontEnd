@@ -13,6 +13,7 @@ var bodyParser  = require('body-parser');
 var passwoid = require('passwoid');
 var morgan      = require('morgan');
 var mongoose    = require('mongoose');
+var passwordHash = require('password-hash');
 var Fiber = require('fibers');
 var jwt    = require('jsonwebtoken'); // used to create, sign, and verify tokens
 var config = require('./config'); // get our config file
@@ -45,7 +46,7 @@ var apiRoutes = express.Router();
 var server = http.createServer(app);
 var customers = mongoose.model('customers');
 var settings = mongoose.model('settings');
-var datastore = mongoose.model('datastore',Schema);
+var datastore = mongoose.model('datastore');
 
 // create reusable transporter object using the default SMTP transport
 var transporter = nodemailer.createTransport('smtps://pierredbush%40gmail.com:pass@smtp.gmail.com');
@@ -64,7 +65,7 @@ app.post('/submitRegistration', function(req, res) {
 	console.log('Add Customer ' + req.body.name + ' to Database');
 	var email = req.body.emailaddress.trim();
 	var name = req.body.name.trim();
-	var password = req.body.password;
+	var password = passwordHash.generate(req.body.password);
 	
 	customers.findOne({
 		username: email
@@ -175,7 +176,7 @@ app.get('/userLogin', function(req, res) {
 			res.json({ success: false, message: 'Authentication failed. User not found.' });
 		} else if (user) {
 			// check if password matches
-			if (user.password !== req.query.password) {
+			if (!passwordHash.verify(req.query.password,user.password)) {
 				console.log('Authentication failed. User not found.');
 				res.json({ success: false, message: 'Authentication failed. Wrong password.' });
 			} else {
@@ -206,15 +207,12 @@ app.get('/userLogin', function(req, res) {
 
 app.get('/isEmailAvailable', function(req, res) {
 	var email =  req.query.emailaddress.trim();
-	
 	console.log('Check Is ' + email + ' is Available');
 	// find the user
 	customers.findOne({
 		emailaddress: email
 	}, function(err, user) {
-
 		if (err) {throw err;}
-
 		if (!user) {
 			console.log('Email is available');
 			res.json({ success: true, emailaddress: email});
@@ -239,7 +237,7 @@ app.post('/emailResetPassword', function(req, res){
   	  }
   	  else if(user){
     	console.log('Send Email Password Reset Successfully');
-    	user.password = passwoid(8);
+    	user.password = passwordHash.generate(passwoid(8));
 	    var newhistory = {
 	    		description: 'Reset Password successfully',
 	    	    actiontype: 'Password Update',
@@ -264,8 +262,6 @@ app.post('/emailResetPassword', function(req, res){
     	    }
     	    console.log('Message sent: ' + info.response);
     	});
-    	
-    	
   		res.json({ success: true, message: 'Send Email Password Reset Successfully' });
   	  }
   	});
@@ -312,7 +308,6 @@ apiRoutes.use(function(req, res, next) {
 //authenticated routes
 //---------------------------------------------------------
 
-//apiRoutes.get(routes);
 apiRoutes.get('/getPortfolio', routes.portfolio);
 apiRoutes.get('/getMarket', routes.market);
 apiRoutes.get('/getSearch', routes.search);

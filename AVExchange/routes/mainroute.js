@@ -16,6 +16,7 @@ var datastore = mongoose.model('datastore',Schema);
 var settings = mongoose.model('settings',Schema);
 var querystring = require('querystring');
 var https = require('https');
+var passwordHash = require('password-hash');
 var host = 'http://api.probasketballapi.com';
 var apiKey = 'o0Q26qMPmn3az74dyGLhFItWCR5ZicHj';
 var username = '*****';
@@ -126,7 +127,7 @@ exports.updatepass =  function(req,res){
   	  }
   	  else if(success){
     	    console.log('Updated Password successfully');
-    	    user.password = req.body.password;
+    	    user.password = passwordHash.generate(req.body.password);
     	    var newhistory = {
 		    		description: 'Updated Password successfully',
 		    	    actiontype: 'Password Update',
