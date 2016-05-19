@@ -32,7 +32,7 @@ exports.main = function (req,res)
 
 exports.ordersettings = function(req,req){
 	   console.log('Fetched Order Settings');
-		customers.findById(req.decoded._id, function(err, user) {
+		customers.findById(req.decoded._doc._id, function(err, user) {
 			if (err) {throw err;}
 			if (!user) {
 			    console.log('User was not found');
@@ -66,7 +66,7 @@ exports.ordersettings = function(req,req){
 exports.portfolio = function(req,res){
 	// find the user
     console.log('Fetched Portfolio');
-	customers.findById(req.decoded._id, function(err, user) {
+	customers.findById(req.decoded._doc._id, function(err, user) {
 		if (err) {throw err;}
 		if (!user) {
 		    console.log('User was not found');
@@ -78,10 +78,10 @@ exports.portfolio = function(req,res){
 	});
 };
 
+// Get Customer Account History
 exports.getcustomerhistory = function(req,res){
-	// find the user
     console.log('Fetched Portfolio');
-	customers.findById(req.decoded._id, function(err, user) {
+	customers.findById(req.decoded._doc._id, function(err, user) {
 		if (err) {throw err;}
 		if (!user) {
 		    console.log('User was not found');
@@ -93,10 +93,10 @@ exports.getcustomerhistory = function(req,res){
 	});
 };
 
+//Get Customer's Balance History
 exports.getbalancehistory = function(req,res){
-	// find the user
     console.log('Fetched Portfolio');
-	customers.findById(req.decoded._id, function(err, user) {
+	customers.findById(req.decoded._doc._id, function(err, user) {
 		if (err) {throw err;}
 		if (!user) {
 		    console.log('User was not found');
@@ -108,11 +108,11 @@ exports.getbalancehistory = function(req,res){
 	});
 };
 
-//History
+//Update Password
 exports.updatepass =  function(req,res){
 	// find the user
     console.log('Update Password: ' + req.decoded.emailaddress);
-    customers.findById(req.decoded._id, function (err, success) {
+    customers.findById(req.decoded._doc._id, function (err, success) {
   	  if (err) return handleError(err);
   	  if(!success){
     	    console.log('Updated Password failed');
@@ -141,13 +141,13 @@ exports.updatepass =  function(req,res){
 };
 
 
-//Post-Update Customer Account
+//Update Customer Account
 exports.updatecustomer =  function(req,res){
 	var email = req.body.emailaddress.trim();
 	var name = req.body.name.trim();
 	
-    console.log('Updating Customer: ' + req.decoded._id);
-    customers.findById(req.decoded._id, function (err, user) {
+    console.log('Updating Customer: ' + req.decoded._doc._id);
+    customers.findById(req.decoded._doc._id, function (err, user) {
     	  if (err) return handleError(err);
     	  if(!user){
       	    console.log('Updated User Account failed');
@@ -155,10 +155,8 @@ exports.updatecustomer =  function(req,res){
     	  }
     	  else if(user){
     		  var isSameEmail = user.emailaddress == email;
-    		  
     		  if(isSameEmail){
     		   	    console.log('Updated User Account successfully');
-    	      	    //user.emailaddress = req.body.emailaddress;
     	      	    user.name = name;
     	      	  var newhistory = {
     			    		description: 'Account update succeed',
@@ -198,6 +196,7 @@ exports.updatecustomer =  function(req,res){
     	});
 };
 
+//Get All Available Athletes
 exports.market = function(req,res){
     console.log('Get MarketPlace');
 	athletes.find({'isavailable':true}, function(err, market) {
@@ -212,9 +211,8 @@ exports.market = function(req,res){
 	});
 };
 
-//Data Store
+//Find Athletes That Match the Search Request
 exports.search = function(req,res){
-	//find athlete with name using like
     console.log('Get Search');
 	athletes.find({$or: [{name:  { $regex: new RegExp("^"+req.query.search.replace("+"," "), "i") }}, {firstname:  { $regex: new RegExp("^"+req.query.search.replace("+"," "), "i") }}, {lastname:  { $regex: new RegExp("^"+req.query.search.replace("+"," "), "i") }} ] }, function(err, athlete) {
 			if (err) {throw err;}
@@ -223,7 +221,7 @@ exports.search = function(req,res){
 				res.json({ success: false, message: 'Nothing was found.' });
 			} else if (athlete) {
 			    console.log('Received Results: ' + athlete);
-			 // create user
+			 // create search request result
 				var data = new datastore({ 
 					description: 'Search request: ' + athlete,
 		    	    actiontype: 'Search',
@@ -239,7 +237,7 @@ exports.search = function(req,res){
 	});
 };
 
-
+//Get Athlete Quotes
 exports.quotes =  function(req,res){
     console.log('Get Quotes');
 	athletes.find({ quote: { $ne: null }},'quote name currentprice', function(err, quotes) {
@@ -254,7 +252,7 @@ exports.quotes =  function(req,res){
 	});
 };
 
-//Data Store
+//Get NBA Box Score Stats
 exports.nbaboxscorestats = function(req,res){
 	var athleteid = req.query.athleteid.trim();
     console.log('Get Stats for Player:' + athleteid);
@@ -279,7 +277,7 @@ exports.nbaboxscorestats = function(req,res){
     	});
 };
 
-//Data Store
+//Get NBA Advanced Score States
 exports.nbaadvancedstats = function(req,res){
 	var athleteid = req.query.athleteid.trim();
 	var gameid = req.query.gameid.trim();
@@ -304,9 +302,9 @@ exports.nbaadvancedstats = function(req,res){
     	});
 };
 
-//Data Store
+//Get Market Trends 
 exports.markettrends = function(req,res){
-	markettrends.find({}, function(err, markettrend) {
+	markettrends.find({}).sort({recordstatusdate: -1}).limit(1).exec(function(err, markettrend) {
 			if (err) {throw err;}
 			if (!markettrend) {
 			    console.log('Nothing was found');
@@ -318,7 +316,7 @@ exports.markettrends = function(req,res){
 	});
 };
 
-//Data Store
+//Get All Orders By Athlete
 exports.ordersbyathlete = function(req,res){
 	var athleteid = req.query.athleteid.trim();
     console.log('Get Orders By Athlete; Athlete ID:' + athleteid );
@@ -334,11 +332,11 @@ exports.ordersbyathlete = function(req,res){
 	});
 };
 
-//Data Store
+//Get All Customer Orders
 exports.getcustomerorders = function(req,res){
 	var athleteid = req.query.athleteid.trim();
     console.log('Get Customer Orders By Athlete; Athlete ID:' + athleteid);
-	orders.find({athleteid: athleteid, customerid: req.decoded._id}, function(err, order) {
+	orders.find({athleteid: athleteid, customerid: req.decoded._doc._id}, function(err, order) {
 			if (err) {throw err;}
 			if (!order) {
 			    console.log('Nothing was found');
@@ -350,6 +348,7 @@ exports.getcustomerorders = function(req,res){
 	});
 };
 
+//Update Order For Athlete
 exports.updateorder =  function(req,res){
     console.log('Update Order');
     
@@ -361,7 +360,7 @@ exports.updateorder =  function(req,res){
     
     var orderid = req.body.orderid.trim();
     
-	customers.findById(req.decoded._id, function(err, user) {
+	customers.findById(req.decoded._doc._id, function(err, user) {
 		if (err) {throw err;}
 		if (!user) {
 		    console.log('User was not found');
@@ -423,8 +422,7 @@ exports.updateorder =  function(req,res){
 	};
 
 	
-//Transaction
-
+//Cancel Order
 exports.cancelorder =  function(req,res){
     console.log('Cancelling Order');
     
@@ -433,7 +431,7 @@ exports.cancelorder =  function(req,res){
     var availableshares = 0.00;
     var totalshares = 0.00;
     
-	customers.findById(req.decoded._id, function(err, user) {
+	customers.findById(req.decoded._doc._id, function(err, user) {
 		if (err) {throw err;}
 		if (!user) {
 		    console.log('User was not found');
@@ -537,7 +535,7 @@ exports.cancelorder =  function(req,res){
 		});
 	};
 	
-//Transaction
+//Submit Order
 var submitorder =  Fiber(function(req,res){
     console.log('Submitting Order');
     
@@ -550,7 +548,7 @@ var submitorder =  Fiber(function(req,res){
     var quantity = req.body.quantity.trim();
     var actiontype = req.body.actiontype.toLowerCase();
     
-	customers.findById(req.decoded._id, function(err, user) {
+	customers.findById(req.decoded._doc._id, function(err, user) {
 		if (err) {throw err;}
 		if (!user) {
 		    console.log('User was not found');
@@ -610,7 +608,7 @@ var submitorder =  Fiber(function(req,res){
 										    var isneworder = true;
 										    var neworder = {
 													quote: athlete.quote, 
-													customerid: req.decoded._id,
+													customerid: req.decoded._doc._id,
 													quantity: quantity,
 													actiontype: actiontype,
 													cost: quantity * finalprice,
@@ -644,7 +642,6 @@ var submitorder =  Fiber(function(req,res){
 
 															   if(availableshares > neworder.quantity && balance.account_balance)
 														    	{
-
 														    		orders.find({$and : [ {$or: [ { athleteid: athleteid }, { extathleteid: externalathleteid } ]}, {recordstatus : {$ne : 3}}, {actiontype: 'sell'}  ]},function(err,order){
 														    			if (err) {throw err;}
 																		if (!order) {
@@ -847,7 +844,7 @@ var submitorder =  Fiber(function(req,res){
 																													});
 																											    }
 																										}
-																										  });
+																								});
 																							}
 																						});
 																					}
@@ -880,7 +877,7 @@ var submitorder =  Fiber(function(req,res){
 																		    
 																		    var leftoverorder = {
 																					quote: athlete.quote, 
-																					customerid: req.decoded._id,
+																					customerid: req.decoded._doc._id,
 																					quantity: remainingshares,
 																					actiontype: req.body.actiontype.toLowerCase(),
 																					cost: remainingshares * finalprice,
@@ -1488,7 +1485,7 @@ var submitorder =  Fiber(function(req,res){
 															    
 															    var leftoverorder = {
 																		quote: athlete.quote, 
-																		customerid: req.decoded._id,
+																		customerid: req.decoded._doc._id,
 																		quantity: remainingshares,
 																		actiontype: req.body.actiontype.toLowerCase(),
 																		cost: remainingshares * finalprice,
@@ -1805,7 +1802,7 @@ exports.submitorder = function(req,res){
 exports.accountbalance = function(req,res){
     console.log('Get Account Balance for Customer:' + req.decoded.emailaddress);
 	// find the user
-	customers.findById(req.decoded._id, function(err, user) {
+	customers.findById(req.decoded._doc._id, function(err, user) {
 		if (err) {throw err;}
 		if (!user) {
 			console.log('Authentication failed. User not found.');
@@ -1835,7 +1832,7 @@ exports.accountbalance = function(req,res){
 exports.addaccount = function(req,res){
 	   console.log('Add Account for Customer:' + req.decoded.emailaddress);
 		// find the user
-		customers.findById(req.decoded._id, function(err, user) {
+		customers.findById(req.decoded._doc._id, function(err, user) {
 			if (err) {throw err;}
 			if (!user) {
 				console.log('Authentication failed. User not found.');
@@ -1903,7 +1900,7 @@ exports.removeaccount = function(req,res){
 	
 	   console.log('Remove account from Customer:' + req.decoded.emailaddress);
 		// find the user
-		customers.findById(req.decoded._id, function(err, user) {
+		customers.findById(req.decoded._doc._id, function(err, user) {
 			if (err) {throw err;}
 			if (!user) {
 				console.log('Authentication failed. User not found.');
@@ -1975,7 +1972,7 @@ exports.withdrawal = function(req,res){
 	
     console.log('Withdrawal Money From Customer Account:' + req.decoded.emailaddress);
 	// find the user
-	customers.findById(req.decoded._id, function(err, user) {
+	customers.findById(req.decoded._doc._id, function(err, user) {
 		if (err) {throw err;}
 		if (!user) {
 			console.log('Authentication failed. User not found.');
@@ -2096,7 +2093,7 @@ exports.deposit = function(req,res){
 	
     console.log('Deposit Money into Customer Account:' + req.decoded.emailaddress);
 	// find the user
-	customers.findById(req.decoded._id, function(err, user) {
+	customers.findById(req.decoded._doc._id, function(err, user) {
 		if (err) {throw err;}
 		if (!user) {
 			console.log('Authentication failed. User not found.');
@@ -2211,7 +2208,7 @@ exports.getteam = function(req,res){
 exports.getcustomercards = function(req,res){
     console.log('Get Cards For Customer:' + req.decoded.emailaddress);
 	// find the user
-	customers.findById(req.decoded._id, function(err, user) {
+	customers.findById(req.decoded._doc._id, function(err, user) {
 		if (err) {throw err;}
 		if (!user) {
 			console.log('Authentication failed. User not found.');

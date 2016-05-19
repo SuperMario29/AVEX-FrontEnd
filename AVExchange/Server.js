@@ -51,7 +51,7 @@ var datastore = mongoose.model('datastore');
 // create reusable transporter object using the default SMTP transport
 var transporter = nodemailer.createTransport('smtps://pierredbush%40gmail.com:pass@smtp.gmail.com');
 
-//basic route (http://localhost:8080)
+//basic route (http://localhost:8080)-Check To See if App is Online
 app.get('/', function(req, res) {
 	res.send('Hello! The API is at http://localhost:' + port + '');
 });
@@ -60,6 +60,8 @@ app.get('/', function(req, res) {
 //=================================================================
 //routes ==========================================================
 //=================================================================
+
+//Submit User Registration Info
 app.post('/submitRegistration', function(req, res) {
 
 	console.log('Add Customer ' + req.body.name + ' to Database');
@@ -142,7 +144,8 @@ app.post('/submitRegistration', function(req, res) {
 //---------------------------------------------------------
 //authentication (no middleware necessary since this isnt authenticated)
 //---------------------------------------------------------
-//http://localhost:8080/api/authenticate
+
+//Get Settings for App
 app.get('/getsettings', function(req,res){
 	console.log('Get Settings');
 	settings.findOne(function(err, setting) {
@@ -157,7 +160,7 @@ app.get('/getsettings', function(req,res){
 });
 });
 
-
+//Log User Into Account
 app.get('/userLogin', function(req, res) {
 
 	var email = req.query.emailaddress.trim();
@@ -204,7 +207,7 @@ app.get('/userLogin', function(req, res) {
 	});
 });
 
-
+//Check If Email Is Available
 app.get('/isEmailAvailable', function(req, res) {
 	var email =  req.query.emailaddress.trim();
 	console.log('Check Is ' + email + ' is Available');
@@ -223,7 +226,7 @@ app.get('/isEmailAvailable', function(req, res) {
 	});
 });
 
-//History
+//Reset Password By Email
 app.post('/emailResetPassword', function(req, res){
 	// reset user password
 	var email =  req.body.emailaddress.trim();
@@ -286,6 +289,7 @@ apiRoutes.use(function(req, res, next) {
 				return res.json({ success: false, message: 'Failed to authenticate token.' });		
 			} else {
 				console.log('User authenticated!!');
+				console.log(decoded);
 				// if everything is good, save to request for use in other routes
 				req.decoded = decoded;
 				next();
