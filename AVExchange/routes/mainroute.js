@@ -568,7 +568,7 @@ var submitorder =  Fiber(function(req,res){
 					}
 					else if(balance){
 						   console.log('Account Info:' + balance);
-							var accountbalance = (balance.account_balance * -1) / 100;
+							var accountbalance = (+balance.account_balance * -1) / 100;
 							 // find by some conditions and update
 							settings.findOne(function(err, setting) {
 								if (err) {throw err;}
@@ -613,7 +613,7 @@ var submitorder =  Fiber(function(req,res){
 													customerid: req.decoded._doc._id,
 													quantity: quantity,
 													actiontype: actiontype,
-													cost: quantity * finalprice,
+													cost: +quantity * +finalprice,
 													commission: finalcommission,
 													recordstatusdate: new Date(),
 												    recordstatus: '1',
@@ -642,7 +642,7 @@ var submitorder =  Fiber(function(req,res){
 										    {
 										    	console.log("Athlete ID: " + athleteid);						    	
 
-															   if(availableshares > neworder.quantity && balance.account_balance)
+															   if(+availableshares > +neworder.quantity && balance.account_balance)
 														    	{
 														    		orders.find({$and : [ {$or: [ { athleteid: athleteid }, { extathleteid: externalathleteid } ]}, {recordstatus : {$ne : 3}}, {actiontype: 'sell'}  ]},function(err,order){
 														    			if (err) {throw err;}
@@ -776,7 +776,7 @@ var submitorder =  Fiber(function(req,res){
 																										}
 																										else if(nextuserbalance){
 																											   console.log('Account Info:' + nextuserbalance);
-																												var nextuseraccountbalance = (nextuserbalance.account_balance * -1) / 100;
+																												var nextuseraccountbalance = (+nextuserbalance.account_balance * -1) / 100;
 																												
 																											    var nextposition = nextuser.listofathletes.athleteid(athlete._id);
 																											    
@@ -791,16 +791,16 @@ var submitorder =  Fiber(function(req,res){
 																											    	
 																											    	var ordercost = tempQuantity * finalprice;
 																											    	
-																											    	var newquantity = nextcurrentquantity - +tempQuantity;
+																											    	var newquantity = +nextcurrentquantity - +tempQuantity;
 																											    	
 																											    	nextposition.quantity = newquantity,
-																											    	nextposition.costpershare = ((nextcurrentquantity * currentcostpershare) - (ordercost)) / newquantity ,
+																											    	nextposition.costpershare = ((+nextcurrentquantity * +currentcostpershare) - (+ordercost)) / +newquantity ,
 																											    	nextposition.athletename = athlete.name,
 																											    	nextposition.imageurl = athlete.imageurl,
 																											    	nextposition.recordstatusdate = new Date(),
 																											    	nextposition.recordstatus = nextrecordstatus
 																											    
-																											    var nextusernewbalance = nextuseraccountbalance + ordercost;
+																											    var nextusernewbalance = parseInt((+nextuseraccountbalance + +ordercost) * 100) * -1;
 																											    
 																												stripe.customers.update(nextuser.stripeaccount, {
 																													account_balance: nextusernewbalance
@@ -873,8 +873,8 @@ var submitorder =  Fiber(function(req,res){
 																		
 																		if(updateshares >= 0){
 																			remainingshares = updateshares;
-																			updateshares = intitalQuantityRequest - updateshares;
-																		    neworder.cost = updateshares * finalprice;
+																			updateshares = +intitalQuantityRequest - +updateshares;
+																		    neworder.cost = +updateshares * +finalprice;
 																		    neworder.quantity = updateshares;
 																		    
 																		    var leftoverorder = {
@@ -895,7 +895,7 @@ var submitorder =  Fiber(function(req,res){
 																		  
 																		  var lefto = new orders(leftoverorder); 
 																		  
-																			var newbalance = parseInt((accountbalance - neworder.cost) * 100);
+																			var newbalance = parseInt((+accountbalance - +neworder.cost) * 100) * -1;
 																			
 																		    athlete.listorders.push(neworder);
 																		    athlete.availableshares = availableshares + -updateshares;
@@ -910,8 +910,8 @@ var submitorder =  Fiber(function(req,res){
 																		    user.listoftransactions.push(newtransaction);
 																		    
 																		    if(isresellable){
-																		    	var x = (neworder.quantity / totalshares);
-																		    	athlete.finalprice = (finalprice * x) + finalprice;
+																		    	var x = (+neworder.quantity / +totalshares);
+																		    	athlete.finalprice = (+finalprice * +x) + +finalprice;
 																		    	
 																		    	var history = {
 																			    		price: athlete.finalprice,
@@ -1017,7 +1017,7 @@ var submitorder =  Fiber(function(req,res){
 																				});
 																		}
 																		else{
-																			var newbalance = parseInt((accountbalance - neworder.cost) * 100);
+																			var newbalance = parseInt((+accountbalance - +neworder.cost) * 100) * -1;
 																			
 																		    athlete.listorders.push(neworder);
 																		    athlete.availableshares = availableshares + -updateshares;
@@ -1032,8 +1032,8 @@ var submitorder =  Fiber(function(req,res){
 																		    user.listoftransactions.push(newtransaction);
 																		    
 																		    if(isresellable){
-																		    	var x = (neworder.quantity / totalshares);
-																		    	athlete.finalprice = (finalprice * x) + finalprice;
+																		    	var x = (+neworder.quantity / +totalshares);
+																		    	athlete.finalprice = (+finalprice * x) + +finalprice;
 																		    	
 																		    	var history = {
 																			    		price: athlete.finalprice,
@@ -1050,7 +1050,7 @@ var submitorder =  Fiber(function(req,res){
 																		    	var newpositionquantity = +currentquantity + +updateshares;
 																		    	
 																		    	existingposition.quantity = newpositionquantity,
-																		        existingposition.costpershare = ((currentcostpershare * currentquantity) + (updateshares * finalprice)) / newpositionquantity,
+																		        existingposition.costpershare = ((+currentcostpershare * +currentquantity) + (+updateshares * +finalprice)) / +newpositionquantity,
 																		        existingposition.athletename = athlete.name,
 																		        existingposition.imageurl = athlete.imageurl,
 																		        existingposition.recordstatusdate = new Date(),
@@ -1187,10 +1187,10 @@ var submitorder =  Fiber(function(req,res){
 												    user.listoftransactions.push(newtransaction);
 												    
 												    if(!isresellable){
-												    	var x = (neworder.quantity / totalshares);
-												    	athlete.finalprice = finalprice - (finalprice * x);
+												    	var x = (+neworder.quantity / +totalshares);
+												    	athlete.finalprice = +finalprice - (+finalprice * +x);
 												    	
-																	var newaccountbalance = accountbalance + neworder.cost;
+																	var newaccountbalance = parseInt(+accountbalance + +neworder.cost) * -1;
 																	stripe.customers.update(user.stripeaccount, {
 																		account_balance: newaccountbalance
 																		}, function(err, balance) {
@@ -1387,7 +1387,7 @@ var submitorder =  Fiber(function(req,res){
 																							}
 																							else if(nextuserbalance){
 																								   console.log('Account Info:' + nextuserbalance);
-																									var nextuseraccountbalance = (nextuserbalance.account_balance * -1) / 100;
+																									var nextuseraccountbalance = (+nextuserbalance.account_balance * -1) / 100;
 																									
 																								    var nextposition = nextuser.listofathletes.athleteid(athlete._id);
 																								    
@@ -1400,18 +1400,18 @@ var submitorder =  Fiber(function(req,res){
 																								    		nextrecordstatus = 3;
 																								    	}
 																								    	
-																								    	var ordercost = tempQuantity * finalprice;
+																								    	var ordercost = +tempQuantity * +finalprice;
 																								    	
-																								    	var newquantity = nextcurrentquantity + +tempQuantity;
+																								    	var newquantity = +nextcurrentquantity + +tempQuantity;
 																								    	
 																								    	nextposition.quantity = newquantity,
-																								    	nextposition.costpershare = ((nextcurrentquantity * currentcostpershare) + (ordercost)) / newquantity ,
+																								    	nextposition.costpershare = ((+nextcurrentquantity * +currentcostpershare) + (+ordercost)) / +newquantity ,
 																								    	nextposition.athletename = athlete.name,
 																								    	nextposition.imageurl = athlete.imageurl,
 																								    	nextposition.recordstatusdate = new Date(),
 																								    	nextposition.recordstatus = nextrecordstatus
 
-																												var newnextuseraccountbalance = parseInt((nextuseraccountbalance - ordercost) * 100);
+																												var newnextuseraccountbalance = parseInt((+nextuseraccountbalance - +ordercost) * 100) * -1;
 																												stripe.customers.update(nextuser.stripeaccount, {
 																													account_balance: newnextuseraccountbalance
 																													}, function(err, nextaccountbalance) {
@@ -1481,8 +1481,8 @@ var submitorder =  Fiber(function(req,res){
 															
 															if(updateshares >= 0){
 																remainingshares = updateshares;
-																updateshares = intitalQuantityRequest - updateshares;
-															    neworder.cost = updateshares * finalprice;
+																updateshares = +intitalQuantityRequest - +updateshares;
+															    neworder.cost = +updateshares * +finalprice;
 															    neworder.quantity = updateshares;
 															    
 															    var leftoverorder = {
@@ -1503,7 +1503,7 @@ var submitorder =  Fiber(function(req,res){
 															  
 															  var lefto = new orders(leftoverorder); 
 															  
-																var newbalance = parseInt((accountbalance + neworder.cost) * 100);
+																var newbalance = parseInt((+accountbalance + +neworder.cost) * 100) * -1;
 																
 															    athlete.listorders.push(neworder);
 															    athlete.availableshares = availableshares + -updateshares;
@@ -1518,8 +1518,8 @@ var submitorder =  Fiber(function(req,res){
 															    user.listoftransactions.push(newtransaction);
 															    
 															    if(isresellable){
-															    	var x = (neworder.quantity / totalshares);
-															    	athlete.finalprice = (finalprice * x) + finalprice;
+															    	var x = (+neworder.quantity / +totalshares);
+															    	athlete.finalprice = (+finalprice * +x) + +finalprice;
 															    	
 															    	var history = {
 																    		price: athlete.finalprice,
@@ -1536,7 +1536,7 @@ var submitorder =  Fiber(function(req,res){
 															    	var newpositionquantity = +currentquantity + +updateshares;
 															    	
 															    	existingposition.quantity = newpositionquantity,
-															        existingposition.costpershare = ((currentcostpershare * currentquantity) + (updateshares * finalprice)) / newpositionquantity,
+															        existingposition.costpershare = ((+currentcostpershare * +currentquantity) + (+updateshares * +finalprice)) / +newpositionquantity,
 															        existingposition.athletename = athlete.name,
 															        existingposition.imageurl = athlete.imageurl,
 															        existingposition.recordstatusdate = new Date(),
@@ -1642,10 +1642,10 @@ var submitorder =  Fiber(function(req,res){
 																	});
 															}
 															else if (updateshares == 0){
-																var newbalance = parseInt((accountbalance + neworder.cost) * 100);
+																var newbalance = parseInt((+accountbalance + +neworder.cost) * 100) * -1;
 																
 															    athlete.listorders.push(neworder);
-															    athlete.availableshares = availableshares + -updateshares;
+															    athlete.availableshares = +availableshares + -updateshares;
 																
 															    var newtransaction = {
 															    		description: 'Buy Order: ' + athlete.name,
@@ -1657,8 +1657,8 @@ var submitorder =  Fiber(function(req,res){
 															    user.listoftransactions.push(newtransaction);
 															    
 															    if(isresellable){
-															    	var x = (neworder.quantity / totalshares);
-															    	athlete.finalprice = (finalprice * x) + finalprice;
+															    	var x = (+neworder.quantity / +totalshares);
+															    	athlete.finalprice = (+finalprice * +x) + +finalprice;
 															    	
 															    	var history = {
 																    		price: athlete.finalprice,
@@ -1675,7 +1675,7 @@ var submitorder =  Fiber(function(req,res){
 															    	var newpositionquantity = +currentquantity + +updateshares;
 															    	
 															    	existingposition.quantity = newpositionquantity,
-															        existingposition.costpershare = ((currentcostpershare * currentquantity) + (updateshares * finalprice)) / newpositionquantity,
+															        existingposition.costpershare = ((+currentcostpershare * +currentquantity) + (+updateshares * +finalprice)) / +newpositionquantity,
 															        existingposition.athletename = athlete.name,
 															        existingposition.imageurl = athlete.imageurl,
 															        existingposition.recordstatusdate = new Date(),
@@ -1822,7 +1822,7 @@ exports.accountbalance = function(req,res){
 						}
 						else if(balance){
 							   console.log('Account Info:' + balance);
-							   var accountbalance = (balance.account_balance * -1);
+							   var accountbalance = (+balance.account_balance * -1);
 							   balance.account_balance = accountbalance;
 							   res.json(balance)
 						}
@@ -1970,7 +1970,7 @@ exports.validatebankaccount = function(req,res){
 //Withdrawal Funds From Customer's AVEX Account
 exports.withdrawal = function(req,res){
 	var money = req.body.money.trim();
-	var isaccount = req.body.accountid;
+	var isaccount = req.body.accountid.trim();
 	var transaction = 'Withdrawl ' + money + ' From Account';
 	
     console.log('Withdrawal Money From Customer Account:' + req.decoded._doc.emailaddress);
@@ -1992,8 +1992,8 @@ exports.withdrawal = function(req,res){
 						res.json({ success: false, message: 'Balance Was Not Found' });
 					}
 					else if(balance){
-						var accountbalance = (balance.account_balance * -1);
-						if(accountbalance >= req.body.money){
+						var accountbalance = (+balance.account_balance * -1);
+						if(+accountbalance >= +money){
 							if(isaccount){
 								stripe.customers.retrieveCard(
 										  user.stripeaccount,
@@ -2019,7 +2019,7 @@ exports.withdrawal = function(req,res){
 														}
 														else if(charge){
 															console.log("Charge was successful: " + charge);
-															var newaccountbalance = +accountbalance - +money;
+															var newaccountbalance = (+accountbalance - +money) * -1;
 															stripe.customers.update(user.stripeaccount, {
 																account_balance: newaccountbalance
 																}, function(err, balance) {
@@ -2027,7 +2027,7 @@ exports.withdrawal = function(req,res){
 																	if(!balance){
 																		console.log("Customer failed to have account updated with new balance");
 																		 var newtransaction = {
-																		    		description: 'Customer failed to have account updated with new balance: ' + (+req.body.money/100),
+																		    		description: 'Customer failed to have account updated with new balance: ' + (+money/100),
 																		    	    amount: (+money/100),
 																		    	    actiontype: 'Withdrawal',
 																		    	    recordstatusdate: new Date(),
@@ -2092,7 +2092,7 @@ exports.withdrawal = function(req,res){
 exports.deposit = function(req,res){
 	var money = req.body.money.trim();
 	var isaccount = req.body.accountid.trim();
-	var transaction = 'Deposit ' + money + 'Into Account';
+	var transaction = 'Deposit ' + money + ' Into Account';
 	
     console.log('Deposit Money into Customer Account:' + req.decoded._doc.emailaddress);
 	// find the user
@@ -2115,7 +2115,7 @@ exports.deposit = function(req,res){
 							res.json({ success: false, message: 'Balance Was Not Found' });
 						}
 						else if(account){
-							var accountbalance = (account.account_balance * -1);
+							var accountbalance = (+account.account_balance * -1);
 							stripe.customers.retrieveCard(
 									  user.stripeaccount,
 									  isaccount,
@@ -2140,7 +2140,7 @@ exports.deposit = function(req,res){
 													}
 													else if(charge){
 														console.log("Charge was successful:" + charge);
-														var newaccountbalance = accountbalance + money;
+														var newaccountbalance = (+accountbalance + +money) * -1;
 														stripe.customers.update(user.stripeaccount, {
 															account_balance: newaccountbalance
 															}, function(err, balance) {
@@ -2148,7 +2148,7 @@ exports.deposit = function(req,res){
 																if(!balance){
 																	console.log("Customer failed to have account updated with new balance");
 																	var newtransaction = {
-																    		description: 'Customer failed to have account updated with new balance: ' + (+req.body.money/100),
+																    		description: 'Customer failed to have account updated with new balance: ' + (+money/100),
 																    	    amount: (+money/100),
 																    	    actiontype: 'Deposit',
 																    	    recordstatusdate: new Date(),
@@ -2167,9 +2167,9 @@ exports.deposit = function(req,res){
 																		});	
 																}
 																else if(balance){
-																	  console.log("Succesfully deposited customer's funds: " + req.body.money);
+																	  console.log("Succesfully deposited customer's funds: " + money);
 																	  var newtransaction = {
-																	    		description: 'Succesfully deposited customer funds: ' + (+req.body.money/100),
+																	    		description: 'Succesfully deposited customer funds: ' + (+money/100),
 																	    	    amount: (+money/100),
 																	    	    actiontype: 'Deposit',
 																	    	    recordstatusdate: new Date(),
@@ -2183,7 +2183,7 @@ exports.deposit = function(req,res){
 																			  }
 																			  else if(userdata){
 																				  console.log('User Saved Successfully!');
-																				  res.json({ success: true, message: 'Authentication failed. User not found.' });																  }
+																				  res.json({ success: true, message: 'Customer balance was updated successfully.' });																  }
 																			});	
 																	  }
 															});
