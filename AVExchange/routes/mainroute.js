@@ -30,6 +30,7 @@ exports.main = function (req,res)
 	res.json({message:'hooray!welcome to our app'});
 };
 
+//Get Order Settings
 exports.ordersettings = function(req,req){
 	   console.log('Fetched Order Settings');
 		customers.findById(req.decoded._doc._id, function(err, user) {
@@ -63,6 +64,7 @@ exports.ordersettings = function(req,req){
 		});
 };
 
+//Get Customer's Portfolio
 exports.portfolio = function(req,res){
 	// find the user
     console.log('Fetched Portfolio');
@@ -111,7 +113,7 @@ exports.getbalancehistory = function(req,res){
 //Update Password
 exports.updatepass =  function(req,res){
 	// find the user
-    console.log('Update Password: ' + req.decoded.emailaddress);
+    console.log('Update Password: ' + req.decoded._doc.emailaddress);
     customers.findById(req.decoded._doc._id, function (err, success) {
   	  if (err) return handleError(err);
   	  if(!success){
@@ -535,7 +537,7 @@ exports.cancelorder =  function(req,res){
 		});
 	};
 	
-//Submit Order
+//Thread for Submitting Individual Orders
 var submitorder =  Fiber(function(req,res){
     console.log('Submitting Order');
     
@@ -1794,13 +1796,14 @@ var submitorder =  Fiber(function(req,res){
 		}
 	);
 
+//Submit Order for Customer
 exports.submitorder = function(req,res){
-	submitorder.run(req,res);
+	submitorder.run();
 }
 
-//Data Store
+//Get Customer's Account Balance
 exports.accountbalance = function(req,res){
-    console.log('Get Account Balance for Customer:' + req.decoded.emailaddress);
+    console.log('Get Account Balance for Customer:' + req.decoded._doc.emailaddress);
 	// find the user
 	customers.findById(req.decoded._doc._id, function(err, user) {
 		if (err) {throw err;}
@@ -1828,9 +1831,9 @@ exports.accountbalance = function(req,res){
 	});
 };
 
-//History
+//Add Customer Account
 exports.addaccount = function(req,res){
-	   console.log('Add Account for Customer:' + req.decoded.emailaddress);
+	   console.log('Add Account for Customer:' + req.decoded._doc.emailaddress);
 		// find the user
 		customers.findById(req.decoded._doc._id, function(err, user) {
 			if (err) {throw err;}
@@ -1893,12 +1896,12 @@ exports.addaccount = function(req,res){
 		});
 };
 
-//History
+//Remove Customer's Account
 exports.removeaccount = function(req,res){
 	
 	var accountid = req.body.accountid.trim();
 	
-	   console.log('Remove account from Customer:' + req.decoded.emailaddress);
+	   console.log('Remove account from Customer:' + req.decoded._doc.emailaddress);
 		// find the user
 		customers.findById(req.decoded._doc._id, function(err, user) {
 			if (err) {throw err;}
@@ -1959,18 +1962,18 @@ exports.removeaccount = function(req,res){
 		});
 };
 
-//History
+//Validate Customer's External Bank Account
 exports.validatebankaccount = function(req,res){
 	
 };
 
-//Transcation
+//Withdrawal Funds From Customer's AVEX Account
 exports.withdrawal = function(req,res){
 	var money = req.body.money.trim();
 	var isaccount = req.body.accountid;
-	var transactiondescript = req.body.transaction.trim();
+	var transaction = 'Withdrawl ' + money + ' From Account';
 	
-    console.log('Withdrawal Money From Customer Account:' + req.decoded.emailaddress);
+    console.log('Withdrawal Money From Customer Account:' + req.decoded._doc.emailaddress);
 	// find the user
 	customers.findById(req.decoded._doc._id, function(err, user) {
 		if (err) {throw err;}
@@ -2007,7 +2010,7 @@ exports.withdrawal = function(req,res){
 													  currency: "usd",
 													  customer: user.stripeaccount,
 													  source: card.id, // obtained with Stripe.js
-													  description: transactiondescript
+													  description: transaction
 													}, function(err, charge) {
 														if(err){throw err;}
 														if(!charge){
@@ -2085,13 +2088,13 @@ exports.withdrawal = function(req,res){
 	});
 }
 
-//Transaction
+//Deposit Funds Into Customer's AVEX Account
 exports.deposit = function(req,res){
 	var money = req.body.money.trim();
 	var isaccount = req.body.accountid.trim();
-	var transaction = req.body.transaction.trim();
+	var transaction = 'Deposit ' + money + 'Into Account';
 	
-    console.log('Deposit Money into Customer Account:' + req.decoded.emailaddress);
+    console.log('Deposit Money into Customer Account:' + req.decoded._doc.emailaddress);
 	// find the user
 	customers.findById(req.decoded._doc._id, function(err, user) {
 		if (err) {throw err;}
@@ -2199,14 +2202,14 @@ exports.deposit = function(req,res){
 	});
 }
 
-//Data Store
+//Get Team Info
 exports.getteam = function(req,res){
 	
 }
 
-//Data Store
+//Get Customer's Account Info
 exports.getcustomercards = function(req,res){
-    console.log('Get Cards For Customer:' + req.decoded.emailaddress);
+    console.log('Get Cards For Customer:' + req.decoded._doc.emailaddress);
 	// find the user
 	customers.findById(req.decoded._doc._id, function(err, user) {
 		if (err) {throw err;}
@@ -2233,7 +2236,7 @@ exports.getcustomercards = function(req,res){
 	});
 }
 
-//Data Store
+//Get Athlete Info
 exports.getathlete = function(req,res){
 	var athleteid = req.query.athleteid.trim();
 	
