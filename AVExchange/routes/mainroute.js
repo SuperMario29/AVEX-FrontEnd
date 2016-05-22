@@ -913,10 +913,10 @@ var submitorder =  Fiber(function(req){
 																		    
 																		    if(isresellable){
 																		    	var x = (+neworder.quantity / +totalshares);
-																		    	athlete.finalprice = (+finalprice * +x) + +finalprice;
+																		    	athlete.currentprice = (+finalprice * +x) + +finalprice;
 																		    	
 																		    	var history = {
-																			    		price: athlete.finalprice,
+																			    		price: athlete.currentprice,
 																			    	    isathletevalueprice: false,
 																			    	    recordstatusdate: new Date(),
 																			    	    recordstatus: 1
@@ -1036,10 +1036,10 @@ var submitorder =  Fiber(function(req){
 																		    
 																		    if(isresellable){
 																		    	var x = (+neworder.quantity / +totalshares);
-																		    	athlete.finalprice = (+finalprice * x) + +finalprice;
+																		    	athlete.currentprice = (+finalprice * x) + +finalprice;
 																		    	
 																		    	var history = {
-																			    		price: athlete.finalprice,
+																			    		price: athlete.currentprice,
 																			    	    isathletevalueprice: false,
 																			    	    recordstatusdate: new Date(),
 																			    	    recordstatus: 1
@@ -1192,7 +1192,7 @@ var submitorder =  Fiber(function(req){
 												    
 												    if(!isresellable){
 												    	var x = (+neworder.quantity / +totalshares);
-												    	athlete.finalprice = +finalprice - (+finalprice * +x);
+												    	athlete.currentprice = +finalprice - (+finalprice * +x);
 												    	
 																	var newaccountbalance = parseInt(+accountbalance + +neworder.cost) * -1;
 																	stripe.customers.update(user.stripeaccount, {
@@ -1523,10 +1523,10 @@ var submitorder =  Fiber(function(req){
 															    
 															    if(isresellable){
 															    	var x = (+neworder.quantity / +totalshares);
-															    	athlete.finalprice = (+finalprice * +x) + +finalprice;
+															    	athlete.currentprice = (+finalprice * +x) + +finalprice;
 															    	
 															    	var history = {
-																    		price: athlete.finalprice,
+																    		price: athlete.currentprice,
 																    	    isathletevalueprice: false,
 																    	    recordstatusdate: new Date(),
 																    	    recordstatus: 1
@@ -1663,10 +1663,10 @@ var submitorder =  Fiber(function(req){
 															    
 															    if(isresellable){
 															    	var x = (+neworder.quantity / +totalshares);
-															    	athlete.finalprice = (+finalprice * +x) + +finalprice;
+															    	athlete.currentprice = (+finalprice * +x) + +finalprice;
 															    	
 															    	var history = {
-																    		price: athlete.finalprice,
+																    		price: athlete.currentprice,
 																    	    isathletevalueprice: false,
 																    	    recordstatusdate: new Date(),
 																    	    recordstatus: 1

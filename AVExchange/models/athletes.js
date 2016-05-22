@@ -58,7 +58,6 @@ var athleteSchema = new Schema({
     pricehistory: [price],
     team : team,
     listorders : [order],
-    pricehistory: [Number],
     athleteid: Number,
     currentqueue: Number,
     nextqueuenumber: Number
