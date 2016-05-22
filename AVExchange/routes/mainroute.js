@@ -115,7 +115,7 @@ exports.updatepass =  function(req,res){
 	// find the user
     console.log('Update Password: ' + req.decoded._doc.emailaddress);
     customers.findById(req.decoded._doc._id, function (err, success) {
-  	  if (err) return handleError(err);
+  	  if (err) {throw err;};
   	  if(!success){
     	    console.log('Updated Password failed');
     	    var newhistory = {
@@ -150,7 +150,7 @@ exports.updatecustomer =  function(req,res){
 	
     console.log('Updating Customer: ' + req.decoded._doc._id);
     customers.findById(req.decoded._doc._id, function (err, user) {
-    	  if (err) return handleError(err);
+    	  if (err) {throw err;};
     	  if(!user){
       	    console.log('Updated User Account failed');
     		  res.json({ success: false, message: 'Updated User Account failed' }); 
@@ -404,12 +404,12 @@ exports.updateorder =  function(req,res){
 								    athlete.listorders.push(neworder);
 													    									    														
 								    athlete.save(function (err,data) {
-										  if (err) return handleError(err)
+										  if (err) {throw err;}
 										  console.log('Athlete Saved Successfully!');
 										});	
 								    
 								    order.save(function (err,data) {
-										  if (err) return handleError(err)
+										  if (err) {throw err;}
 										  console.log('Order Saved Successfully!');
 										});	
 																			
@@ -482,21 +482,21 @@ exports.cancelorder =  function(req,res){
 								    user.listoftransactions.push(newtransaction);
 													    									    														
 								    athlete.save(function (err,athletedata) {
-										  if (err) return handleError(err)
+										  if (err) {throw err;}
 										  if(!athletedata){
 											  
 										  }
 										  else if(athletedata){
 											  console.log('Athlete Saved Successfully!');
 											  order.save(function (err,orderdata) {
-												  if (err) return handleError(err)
+												  if (err) {throw err;}
 												  if(!orderdata){
 													  
 												  }
 												  else if(orderdata){
 													  console.log('Order Saved Successfully!');
 													  user.save(function (err,userdata) {
-														  if (err) return handleError(err)
+														  if (err) {throw err;}
 														  if(!userdata){
 															  
 														  }
@@ -664,7 +664,7 @@ var submitorder =  Fiber(function(req){
 																		    var o = new orders(neworder);
 																		    
 																		    athlete.save(function (err,athletedata) {
-																				  if (err) return handleError(err)
+																				  if (err) {throw err;}
 																				  if(!athletedata){
 																					  console.log('Athlete Save Failed!');
 																					   athletes.findOneAndUpdate(
@@ -674,7 +674,7 @@ var submitorder =  Fiber(function(req){
 																				  else if(athletedata){
 																					  console.log('Athlete Saved Successfully!');
 																					  o.save(function (err,orderdata) {
-																						  if (err) return handleError(err)
+																						  if (err) {throw err;}
 																						  if(!orderdata){
 																							  console.log('Order Save Failed!');
 																							   athletes.findOneAndUpdate(
@@ -684,7 +684,7 @@ var submitorder =  Fiber(function(req){
 																						  else if(orderdata){
 																							  console.log('Order Saved Successfully!');
 																							  user.save(function (err,userdata) {
-																								  if (err) return handleError(err)
+																								  if (err) {throw err;}
 																								  if(!userdata){
 																									  console.log('User Save Failed!');
 																									   athletes.findOneAndUpdate(
@@ -824,7 +824,7 @@ var submitorder =  Fiber(function(req){
 																														    nextuser.listoftransactions.push(newtransaction);
 																															
 																														    nextuser.save(function (err,data) {
-																																  if (err) return handleError(err)
+																																  if (err) {throw err;}
 																																  if(data){
 																																    	var mailOptions = {
 																																	    	    from: '"AVEX" <avexcustomerrelations@avex.com>', // sender address
@@ -963,7 +963,7 @@ var submitorder =  Fiber(function(req){
 																					else if(balance){
 																						console.log("Successfully charged customer's funds: " + newbalance);
 																						athlete.save(function (err,athletedata) {
-																							  if (err) return handleError(err)
+																							  if (err) {throw err;}
 																							  if(!athletedata){
 																								  console.log('Athlete Save Failed!');
 																								  athletes.findOneAndUpdate(
@@ -973,7 +973,7 @@ var submitorder =  Fiber(function(req){
 																							  else if(athletedata){
 																								  console.log('Athlete Saved Successfully!');
 																								  o.save(function (err,orderdata) {
-																									  if (err) return handleError(err)
+																									  if (err) {throw err;}
 																									  if(!orderdata){
 																										  console.log('Order Save Failed!');
 																										  athletes.findOneAndUpdate(
@@ -983,7 +983,7 @@ var submitorder =  Fiber(function(req){
 																									  else if(orderdata){
 																										  console.log('Order Saved Successfully!');
 																										  lefto.save(function (err,leftorderdata) {
-																											  if (err) return handleError(err)
+																											  if (err) {throw err;}
 																											  if(!leftorderdata){
 																												  console.log('Order Save Failed!');
 																												  athletes.findOneAndUpdate(
@@ -993,7 +993,7 @@ var submitorder =  Fiber(function(req){
 																											  else if(leftorderdata){
 																												  console.log('Order Saved Successfully!');
 																												  user.save(function (err,userdata) {
-																													  if (err) return handleError(err)
+																													  if (err) {throw err;}
 																													  if(!userdata){
 																														  console.log('User Save Failed!');
 																														  athletes.findOneAndUpdate(
@@ -1086,7 +1086,7 @@ var submitorder =  Fiber(function(req){
 																					else if(balance){
 																						console.log("Successfully charged customer's funds: " + newbalance);
 																						athlete.save(function (err,athletedata) {
-																							  if (err) return handleError(err)
+																							  if (err) {throw err;}
 																							  if(!athletedata){
 																								  console.log('Athlete Save Failed!');
 																								  athletes.findOneAndUpdate(
@@ -1096,7 +1096,7 @@ var submitorder =  Fiber(function(req){
 																							  else if(athletedata){
 																								  console.log('Athlete Saved Successfully!');
 																								  o.save(function (err,orderdata) {
-																									  if (err) return handleError(err)
+																									  if (err) {throw err;}
 																									  if(!orderdata){
 																										  console.log('Order Save Failed!');
 																										  athletes.findOneAndUpdate(
@@ -1106,7 +1106,7 @@ var submitorder =  Fiber(function(req){
 																									  else if(orderdata){
 																										  console.log('Order Saved Successfully!');
 																										  user.save(function (err,userdata) {
-																											  if (err) return handleError(err)
+																											  if (err) {throw err;}
 																											  if(!userdata){
 																												  console.log('User Save Failed!');
 																												  athletes.findOneAndUpdate(
@@ -1219,7 +1219,7 @@ var submitorder =  Fiber(function(req){
 																				    user.listoftransactions.push(soldtransaction);
 																				  
 																				    athlete.save(function (err,athletedata) {
-																						  if (err) return handleError(err)
+																						  if (err) {throw err;}
 																						  if(!athletedata){
 																							  console.log('Athlete Save Failed!');
 																							  athletes.findOneAndUpdate(
@@ -1229,7 +1229,7 @@ var submitorder =  Fiber(function(req){
 																						  else if(athletedata){
 																							  console.log('Athlete Saved Successfully!');
 																							  o.save(function (err,orderdata) {
-																								  if (err) return handleError(err)
+																								  if (err) {throw err;}
 																								  if(!orderdata){
 																									  console.log('Order Save Failed!');
 																									  athletes.findOneAndUpdate(
@@ -1239,7 +1239,7 @@ var submitorder =  Fiber(function(req){
 																								  else if(orderdata){
 																									  console.log('Order Saved Successfully!');
 																									  user.save(function (err,userdata) {
-																										  if (err) return handleError(err)
+																										  if (err) {throw err;}
 																										  if(!userdata){
 																											  console.log('User Save Failed!');
 																											  athletes.findOneAndUpdate(
@@ -1285,7 +1285,7 @@ var submitorder =  Fiber(function(req){
 															    console.log('Orders Were Not found');
 															    
 															    athlete.save(function (err,athletedata) {
-																	  if (err) return handleError(err)
+																	  if (err) {throw err;}
 																	  if(!athletedata){
 																		  console.log('Athlete Save Failed!');
 																		  athletes.findOneAndUpdate(
@@ -1295,7 +1295,7 @@ var submitorder =  Fiber(function(req){
 																	  else if(athletedata){
 																		  console.log('Athlete Saved Successfully!');
 																		  o.save(function (err,orderdata) {
-																			  if (err) return handleError(err)
+																			  if (err) {throw err;}
 																			  if(!orderdata){
 																				  console.log('Order Save Failed!');
 																				  athletes.findOneAndUpdate(
@@ -1305,7 +1305,7 @@ var submitorder =  Fiber(function(req){
 																			  else if(orderdata){
 																				  console.log('Order Saved Successfully!');
 																				  user.save(function (err,userdata) {
-																					  if (err) return handleError(err)
+																					  if (err) {throw err;}
 																					  if(!userdata){
 																						  console.log('User Save Failed!');
 																						  athletes.findOneAndUpdate(
@@ -1436,7 +1436,7 @@ var submitorder =  Fiber(function(req){
 																														    nextuser.listoftransactions.push(newtransaction);
 																															
 																														    nextuser.save(function (err,data) {
-																																  if (err) return handleError(err)
+																																  if (err) {throw err;}
 																														var mailOptions = {
 																													    	    from: '"AVEX" <avexcustomerrelations@avex.com>', // sender address
 																													    	    to: '' + nextuser.email + '', // list of receivers
@@ -1573,7 +1573,7 @@ var submitorder =  Fiber(function(req){
 																		else if(balance){
 																			console.log("Successfully charged customer's funds: " + newbalance);
 																			athlete.save(function (err,athletedata) {
-																				  if (err) return handleError(err)
+																				  if (err) {throw err;}
 																				  if(!athletedata){
 																					  console.log('Athlete Save Failed!');
 																					  athletes.findOneAndUpdate(
@@ -1583,7 +1583,7 @@ var submitorder =  Fiber(function(req){
 																				  else if(athletedata){
 																					  console.log('Athlete Saved Successfully!');
 																					  o.save(function (err,orderdata) {
-																						  if (err) return handleError(err)
+																						  if (err) {throw err;}
 																						  if(!orderdata){
 																							  console.log('Order Save Failed!');
 																							  athletes.findOneAndUpdate(
@@ -1593,7 +1593,7 @@ var submitorder =  Fiber(function(req){
 																						  else if(orderdata){
 																							  console.log('Order Saved Successfully!');
 																							  lefto.save(function (err,leftorderdata) {
-																								  if (err) return handleError(err)
+																								  if (err) {throw err;}
 																								  if(!leftorderdata){
 																									  console.log('Order Save Failed!');
 																									  athletes.findOneAndUpdate(
@@ -1603,7 +1603,7 @@ var submitorder =  Fiber(function(req){
 																								  else if(leftorderdata){
 																									  console.log('Order Saved Successfully!');
 																									  user.save(function (err,userdata) {
-																										  if (err) return handleError(err)
+																										  if (err) {throw err;}
 																										  if(!userdata){
 																											  console.log('User Save Failed!');
 																											  athletes.findOneAndUpdate(
@@ -1713,7 +1713,7 @@ var submitorder =  Fiber(function(req){
 																		else if(balance){
 																			console.log("Successfully charged customer's funds: " + newbalance);
 																			athlete.save(function (err,athletedata) {
-																				  if (err) return handleError(err)
+																				  if (err) {throw err;}
 																				  if(!athletedata){
 																					  console.log('Athlete Save Failed!');
 																					  athletes.findOneAndUpdate(
@@ -1723,7 +1723,7 @@ var submitorder =  Fiber(function(req){
 																				  else if(athletedata){
 																					  console.log('Athlete Saved Successfully!');
 																					  o.save(function (err,orderdata) {
-																						  if (err) return handleError(err)
+																						  if (err) {throw err;}
 																						  if(!orderdata){
 																							  console.log('Order Save Failed!');
 																							  athletes.findOneAndUpdate(
@@ -1733,7 +1733,7 @@ var submitorder =  Fiber(function(req){
 																						  else if(orderdata){
 																							  console.log('Order Saved Successfully!');
 																							  user.save(function (err,userdata) {
-																								  if (err) return handleError(err)
+																								  if (err) {throw err;}
 																								  if(!userdata){
 																									  console.log('User Save Failed!');
 																									  athletes.findOneAndUpdate(
@@ -1864,7 +1864,7 @@ exports.addaccount = function(req,res){
 								    };
 								    user.listofcustomerhistory.push(newhistory);
 								    user.save(function (err,userdata) {
-										  if (err) return handleError(err)
+										  if (err) {throw err;}
 										  if(!userdata){
 											  console.log('User Save Failed!');
 										    	 res.json({ success: false, message: 'Unable to add card' });
@@ -1886,7 +1886,7 @@ exports.addaccount = function(req,res){
 							    user.listofcustomerhistory.push(newhistory);
 						    	
 							    user.save(function (err,userdata) {
-									  if (err) return handleError(err)
+									  if (err) {throw err;}
 									  if(!userdata){
 										  console.log('User Save Failed!');
 										    res.json({ success: true, message: 'Added account successfully' });
@@ -1931,7 +1931,7 @@ exports.removeaccount = function(req,res){
 							    };
 							    user.listofcustomerhistory.push(newhistory);
 							    user.save(function (err,userdata) {
-									  if (err) return handleError(err)
+									  if (err) {throw err;}
 									  if(!userdata){
 										  console.log('User Save Failed!');
 										  res.json({ success: false, message: 'Account removal failed' });
@@ -1952,7 +1952,7 @@ exports.removeaccount = function(req,res){
 							    };
 							    user.listofcustomerhistory.push(newhistory);
 							    user.save(function (err,userdata) {
-									  if (err) return handleError(err)
+									  if (err) {throw err;}
 									  if(!userdata){
 										  console.log('User Save Failed!');
 										  res.json({ success: true, message: 'Account removal succeed' });
@@ -2041,7 +2041,7 @@ exports.withdrawal = function(req,res){
 																		    };
 																		    user.listoftransactions.push(newtransaction);
 																		    user.save(function (err,userdata) {
-																				  if (err) return handleError(err)
+																				  if (err) {throw err;}
 																				  if(!userdata){
 																					  console.log('User Save Failed!');
 																						res.json({ success: false, message: 'Customer failed to have account updated with new balance' });
@@ -2063,7 +2063,7 @@ exports.withdrawal = function(req,res){
 																		    };
 																		    user.listoftransactions.push(newtransaction);
 																		    user.save(function (err,userdata) {
-																				  if (err) return handleError(err)
+																				  if (err) {throw err;}
 																				  if(!userdata){
 																					  console.log('User Save Failed!');
 																				  }
@@ -2162,7 +2162,7 @@ exports.deposit = function(req,res){
 																    };
 																    user.listoftransactions.push(newtransaction);
 																    user.save(function (err,userdata) {
-																		  if (err) return handleError(err)
+																		  if (err) {throw err;}
 																		  if(!userdata){
 																			  console.log('User Save Failed!');
 																		  }
@@ -2183,7 +2183,7 @@ exports.deposit = function(req,res){
 																	    };
 																	    user.listoftransactions.push(newtransaction);
 																	    user.save(function (err,userdata) {
-																			  if (err) return handleError(err)
+																			  if (err) {throw err;}
 																			  if(!userdata){
 																				  console.log('User Save Failed!');
 																			  }
