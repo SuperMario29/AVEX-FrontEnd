@@ -112,8 +112,8 @@ exports.getbalancehistory = function(req,res){
 
 //Update Password
 exports.updatepass =  function(req,res){
-	// find the user
     console.log('Update Password: ' + req.decoded._doc.emailaddress);
+    
     customers.findById(req.decoded._doc._id, function (err, success) {
   	  if (err) {throw err;};
   	  if(!success){
@@ -121,7 +121,7 @@ exports.updatepass =  function(req,res){
     	    var newhistory = {
 		    		description: 'Updated Password failed',
 		    	    actiontype: 'Password Update',
-		    	    recordstatusdate: new Date(),
+		    	    recordstatusdate: new Date().getTime(),
 		    	    recordstatus: 1
 		    };
 		    user.listofcustomerhistory.push(newhistory);
@@ -133,7 +133,7 @@ exports.updatepass =  function(req,res){
     	    var newhistory = {
 		    		description: 'Updated Password successfully',
 		    	    actiontype: 'Password Update',
-		    	    recordstatusdate: new Date(),
+		    	    recordstatusdate: new Date().getTime(),
 		    	    recordstatus: 1
 		    };
 		    user.listofcustomerhistory.push(newhistory);
@@ -145,10 +145,10 @@ exports.updatepass =  function(req,res){
 
 //Update Customer Account
 exports.updatecustomer =  function(req,res){
+    console.log('Updating Customer: ' + req.decoded._doc._id);
 	var email = req.body.emailaddress.trim();
 	var name = req.body.name.trim();
-	
-    console.log('Updating Customer: ' + req.decoded._doc._id);
+    
     customers.findById(req.decoded._doc._id, function (err, user) {
     	  if (err) {throw err;};
     	  if(!user){
@@ -163,7 +163,7 @@ exports.updatecustomer =  function(req,res){
     	      	  var newhistory = {
     			    		description: 'Account update succeed',
     			    	    actiontype: 'Update Account',
-    			    	    recordstatusdate: new Date(),
+    			    	    recordstatusdate: new Date().getTime(),
     			    	    recordstatus: 1
     			    };
     			    user.listofcustomerhistory.push(newhistory);
@@ -183,7 +183,7 @@ exports.updatecustomer =  function(req,res){
             	      	  var newhistory = {
             			    		description: 'Account update succeed',
             			    	    actiontype: 'Update Account',
-            			    	    recordstatusdate: new Date(),
+            			    	    recordstatusdate: new Date().getTime(),
             			    	    recordstatus: 1
             			    };
             			    user.listofcustomerhistory.push(newhistory);
@@ -227,7 +227,7 @@ exports.search = function(req,res){
 				var data = new datastore({ 
 					description: 'Search request: ' + athlete,
 		    	    actiontype: 'Search',
-		    	    recordstatusdate: new Date(),
+		    	    recordstatusdate: new Date().getTime(),
 		    	    recordstatus: 1 
 				});
 					
@@ -397,7 +397,7 @@ exports.updateorder =  function(req,res){
 								    
 								    athlete.availableshares = availableshares + -order.quantity;
 								    order.recordstatus = 4;
-								    order.recordstatusdate = new Date();
+								    order.recordstatusdate = new Date().getTime();
 								    
 								    var neworder = order;							    								    
 								    
@@ -424,8 +424,8 @@ exports.updateorder =  function(req,res){
 	};
 
 	
-//Cancel Order
-exports.cancelorder =  function(req,res){
+//User Thread for Cancelling Order
+var cancelorder =  Fiber(function(req){
     console.log('Cancelling Order');
     
     var finalcommission = 0.00;
@@ -454,6 +454,17 @@ exports.cancelorder =  function(req,res){
 									res.json({ success: false, message: 'Athlete Was Not Found' });
 						    	}
 						    	else if (athlete){
+								    var currentqueue = athletes.findOneAndUpdate(
+								    		   { _id: athlete._id },
+								    		   { $inc : { 'nextqueue' : 1 } });
+								    var userqueueposition = currentqueue.nextqueue;
+								    
+								    while (userqueueposition != currentqueue.currentqueue){
+								    	var currentqueue = athletes.findById(athlete._id);
+								        sleep(1000);
+								    }
+								    	
+						    		
 								    console.log('Received Price: ' + athlete.currentprice);
 								    finalprice = athlete.currentprice;
 								    availableshares = athlete.availableshares;
@@ -467,7 +478,7 @@ exports.cancelorder =  function(req,res){
 								    
 								    athlete.availableshares = availableshares + -order.quantity;
 								    order.recordstatus = 4;
-								    order.recordstatusdate = new Date();
+								    order.recordstatusdate = new Date().getTime();
 								    
 								    var cancelorder = order;
 								    athlete.listorders.push(cancelorder);
@@ -476,7 +487,7 @@ exports.cancelorder =  function(req,res){
 								    		description: 'Cancelled Order: ' + athlete.name,
 								    	    amount: order.quantity,
 								    	    actiontype: 'Cancel',
-								    	    recordstatusdate: new Date(),
+								    	    recordstatusdate: new Date().getTime(),
 								    	    recordstatus: 1
 								    };
 								    user.listoftransactions.push(newtransaction);
@@ -535,7 +546,12 @@ exports.cancelorder =  function(req,res){
 					});
 				}
 		});
-	};
+	});
+	
+//Cancel Order for Customer
+exports.cancelorder = function(req,res){
+		cancelorder.run(req);
+}
 	
 //Thread for Submitting Individual Orders
 var submitorder =  Fiber(function(req){
@@ -582,12 +598,23 @@ var submitorder =  Fiber(function(req){
 								    finalcommission = setting.commission;
 								    console.log('Commission: ' + finalcommission);
 								    
+								    
 									athletes.findOne({quote: quote},function(err,athlete){
 										if (err) {throw err;}
 										if (!athlete) {
 										    console.log('Athlete Was Not found');
 											//res.json({ success: false, message: 'Athlete Was Not Found' });
 										} else if (athlete) {
+										    var currentqueue = athletes.findOneAndUpdate(
+										    		   { _id: athlete._id },
+										    		   { $inc : { 'nextqueue' : 1 } });
+										    var userqueueposition = currentqueue.nextqueue;
+										    
+										    while (userqueueposition != currentqueue.currentqueue){
+										    	var currentqueue = athletes.findById(athlete._id);
+										        sleep(1000);
+										    }
+											
 										    console.log('Received Price: ' + athlete.currentprice);
 										    finalprice = athlete.currentprice;
 										    availableshares = athlete.availableshares;
@@ -616,7 +643,7 @@ var submitorder =  Fiber(function(req){
 													actiontype: actiontype,
 													cost: +quantity * +finalprice,
 													commission: finalcommission,
-													recordstatusdate: new Date(),
+													recordstatusdate: new Date().getTime(),
 												    recordstatus: '1',
 												    customerid: user._id,
 												    price: finalprice,
@@ -627,17 +654,6 @@ var submitorder =  Fiber(function(req){
 										            
 										    var updateshares = quantity;
 										    isresellable = athlete.isresellable;
-										    
-										    var currentqueue = athletes.findOneAndUpdate(
-										    		   { _id: athlete._id },
-										    		   { $inc : { 'nextqueue' : 1 } });
-										    var userqueueposition = currentqueue.nextqueue;
-										    
-										    while (userqueueposition != currentqueue.currentqueue){
-										    	var currentqueue = athletes.findById(athlete._id);
-										        sleep(1000);
-										    }
-										    									    
 										    
 										    if (req.body.actiontype.toLowerCase() == "buy")
 										    {
@@ -654,7 +670,7 @@ var submitorder =  Fiber(function(req){
 																		    		description: 'Buy Order: ' + athlete.name,
 																		    	    amount: neworder.cost,
 																		    	    actiontype: 'Buy',
-																		    	    recordstatusdate: new Date(),
+																		    	    recordstatusdate: new Date().getTime(),
 																		    	    recordstatus: 1
 																		    };
 																		    user.listoftransactions.push(newtransaction);
@@ -799,7 +815,7 @@ var submitorder =  Fiber(function(req){
 																											    	nextposition.costpershare = ((+nextcurrentquantity * +currentcostpershare) - (+ordercost)) / +newquantity ,
 																											    	nextposition.athletename = athlete.name,
 																											    	nextposition.imageurl = athlete.imageurl,
-																											    	nextposition.recordstatusdate = new Date(),
+																											    	nextposition.recordstatusdate = new Date().getTime(),
 																											    	nextposition.recordstatus = nextrecordstatus
 																											    
 																											    var nextusernewbalance = parseInt((+nextuseraccountbalance + +ordercost) * 100) * -1;
@@ -818,7 +834,7 @@ var submitorder =  Fiber(function(req){
 																														    		description: 'Sell Order Complete: ' + athlete.name,
 																														    	    amount: ordercost,
 																														    	    actiontype: 'Sold',
-																														    	    recordstatusdate: new Date(),
+																														    	    recordstatusdate: new Date().getTime(),
 																														    	    recordstatus: 1
 																														    };
 																														    nextuser.listoftransactions.push(newtransaction);
@@ -886,7 +902,7 @@ var submitorder =  Fiber(function(req){
 																					actiontype: req.body.actiontype.toLowerCase(),
 																					cost: remainingshares * finalprice,
 																					commission: finalcommission,
-																					recordstatusdate: new Date(),
+																					recordstatusdate: new Date().getTime(),
 																				    recordstatus: '1',
 																				    customerid: user._id,
 																				    price: finalprice,
@@ -906,7 +922,7 @@ var submitorder =  Fiber(function(req){
 																		    		description: 'Buy Order: ' + athlete.name,
 																		    	    amount: neworder.cost,
 																		    	    actiontype: 'Buy',
-																		    	    recordstatusdate: new Date(),
+																		    	    recordstatusdate: new Date().getTime(),
 																		    	    recordstatus: 1
 																		    };
 																		    user.listoftransactions.push(newtransaction);
@@ -918,7 +934,7 @@ var submitorder =  Fiber(function(req){
 																		    	var history = {
 																			    		price: athlete.currentprice,
 																			    	    isathletevalueprice: false,
-																			    	    recordstatusdate: new Date(),
+																			    	    recordstatusdate: new Date().getTime(),
 																			    	    recordstatus: 1
 																			    };
 																			    user.pricehistory.push(history);
@@ -933,13 +949,13 @@ var submitorder =  Fiber(function(req){
 																		        existingposition.costpershare = ((+currentcostpershare * +currentquantity) + (+updateshares * +finalprice)) / +newpositionquantity,
 																		        existingposition.athletename = athlete.name,
 																		        existingposition.imageurl = athlete.imageurl,
-																		        existingposition.recordstatusdate = new Date(),
+																		        existingposition.recordstatusdate = new Date().getTime(),
 																		        existingposition.recordstatus = 1
 																		    }
 																		    else{
 																			    var customerposition = {
 																			    		quote: req.body.quote,
-																			    		recordstatusdate: new Date(),
+																			    		recordstatusdate: new Date().getTime(),
 																			    		recordstatus: 1,
 																			    		costpershare: finalprice,
 																			    		quantity: req.body.quantity,
@@ -1029,7 +1045,7 @@ var submitorder =  Fiber(function(req){
 																		    		description: 'Buy Order: ' + athlete.name,
 																		    	    amount: neworder.cost,
 																		    	    actiontype: 'Buy',
-																		    	    recordstatusdate: new Date(),
+																		    	    recordstatusdate: new Date().getTime(),
 																		    	    recordstatus: 1
 																		    };
 																		    user.listoftransactions.push(newtransaction);
@@ -1041,7 +1057,7 @@ var submitorder =  Fiber(function(req){
 																		    	var history = {
 																			    		price: athlete.currentprice,
 																			    	    isathletevalueprice: false,
-																			    	    recordstatusdate: new Date(),
+																			    	    recordstatusdate: new Date().getTime(),
 																			    	    recordstatus: 1
 																			    };
 																			    user.pricehistory.push(history);
@@ -1056,13 +1072,13 @@ var submitorder =  Fiber(function(req){
 																		        existingposition.costpershare = ((+currentcostpershare * +currentquantity) + (+updateshares * +finalprice)) / +newpositionquantity,
 																		        existingposition.athletename = athlete.name,
 																		        existingposition.imageurl = athlete.imageurl,
-																		        existingposition.recordstatusdate = new Date(),
+																		        existingposition.recordstatusdate = new Date().getTime(),
 																		        existingposition.recordstatus = 1
 																		    }
 																		    else{
 																			    var customerposition = {
 																			    		quote: req.body.quote,
-																			    		recordstatusdate: new Date(),
+																			    		recordstatusdate: new Date().getTime(),
 																			    		recordstatus: 1,
 																			    		costpershare: finalprice,
 																			    		quantity: req.body.quantity,
@@ -1185,7 +1201,7 @@ var submitorder =  Fiber(function(req){
 												    		description: 'Sell Order Submitted: ' + athlete.name,
 												    	    amount: neworder.cost,
 												    	    actiontype: 'Sell',
-												    	    recordstatusdate: new Date(),
+												    	    recordstatusdate: new Date().getTime(),
 												    	    recordstatus: 1
 												    };
 												    user.listoftransactions.push(newtransaction);
@@ -1213,7 +1229,7 @@ var submitorder =  Fiber(function(req){
 																				    		description: 'Sell Order Complete: ' + athlete.name,
 																				    	    amount: neworder.cost,
 																				    	    actiontype: 'Sold',
-																				    	    recordstatusdate: new Date(),
+																				    	    recordstatusdate: new Date().getTime(),
 																				    	    recordstatus: 1
 																				    };
 																				    user.listoftransactions.push(soldtransaction);
@@ -1412,7 +1428,7 @@ var submitorder =  Fiber(function(req){
 																								    	nextposition.costpershare = ((+nextcurrentquantity * +currentcostpershare) + (+ordercost)) / +newquantity ,
 																								    	nextposition.athletename = athlete.name,
 																								    	nextposition.imageurl = athlete.imageurl,
-																								    	nextposition.recordstatusdate = new Date(),
+																								    	nextposition.recordstatusdate = new Date().getTime(),
 																								    	nextposition.recordstatus = nextrecordstatus
 
 																												var newnextuseraccountbalance = parseInt((+nextuseraccountbalance - +ordercost) * 100) * -1;
@@ -1430,7 +1446,7 @@ var submitorder =  Fiber(function(req){
 																														    		description: 'Sell Order Complete: ' + athlete.name,
 																														    	    amount: ordercost,
 																														    	    actiontype: 'Sold',
-																														    	    recordstatusdate: new Date(),
+																														    	    recordstatusdate: new Date().getTime(),
 																														    	    recordstatus: 1
 																														    };
 																														    nextuser.listoftransactions.push(newtransaction);
@@ -1496,7 +1512,7 @@ var submitorder =  Fiber(function(req){
 																		actiontype: req.body.actiontype.toLowerCase(),
 																		cost: +remainingshares * +finalprice,
 																		commission: finalcommission,
-																		recordstatusdate: new Date(),
+																		recordstatusdate: new Date().getTime(),
 																	    recordstatus: '1',
 																	    customerid: user._id,
 																	    price: finalprice,
@@ -1516,7 +1532,7 @@ var submitorder =  Fiber(function(req){
 															    		description: 'Buy Order: ' + athlete.name,
 															    	    amount: neworder.cost,
 															    	    actiontype: 'Buy',
-															    	    recordstatusdate: new Date(),
+															    	    recordstatusdate: new Date().getTime(),
 															    	    recordstatus: 1
 															    };
 															    user.listoftransactions.push(newtransaction);
@@ -1528,7 +1544,7 @@ var submitorder =  Fiber(function(req){
 															    	var history = {
 																    		price: athlete.currentprice,
 																    	    isathletevalueprice: false,
-																    	    recordstatusdate: new Date(),
+																    	    recordstatusdate: new Date().getTime(),
 																    	    recordstatus: 1
 																    };
 																    user.pricehistory.push(history);
@@ -1543,13 +1559,13 @@ var submitorder =  Fiber(function(req){
 															        existingposition.costpershare = ((+currentcostpershare * +currentquantity) + (+updateshares * +finalprice)) / +newpositionquantity,
 															        existingposition.athletename = athlete.name,
 															        existingposition.imageurl = athlete.imageurl,
-															        existingposition.recordstatusdate = new Date(),
+															        existingposition.recordstatusdate = new Date().getTime(),
 															        existingposition.recordstatus = 1
 															    }
 															    else{
 																    var customerposition = {
 																    		quote: req.body.quote,
-																    		recordstatusdate: new Date(),
+																    		recordstatusdate: new Date().getTime(),
 																    		recordstatus: 1,
 																    		costpershare: finalprice,
 																    		quantity: req.body.quantity,
@@ -1656,7 +1672,7 @@ var submitorder =  Fiber(function(req){
 															    		description: 'Buy Order: ' + athlete.name,
 															    	    amount: neworder.cost,
 															    	    actiontype: 'Buy',
-															    	    recordstatusdate: new Date(),
+															    	    recordstatusdate: new Date().getTime(),
 															    	    recordstatus: 1
 															    };
 															    user.listoftransactions.push(newtransaction);
@@ -1668,7 +1684,7 @@ var submitorder =  Fiber(function(req){
 															    	var history = {
 																    		price: athlete.currentprice,
 																    	    isathletevalueprice: false,
-																    	    recordstatusdate: new Date(),
+																    	    recordstatusdate: new Date().getTime(),
 																    	    recordstatus: 1
 																    };
 																    user.pricehistory.push(history);
@@ -1683,13 +1699,13 @@ var submitorder =  Fiber(function(req){
 															        existingposition.costpershare = ((+currentcostpershare * +currentquantity) + (+updateshares * +finalprice)) / +newpositionquantity,
 															        existingposition.athletename = athlete.name,
 															        existingposition.imageurl = athlete.imageurl,
-															        existingposition.recordstatusdate = new Date(),
+															        existingposition.recordstatusdate = new Date().getTime(),
 															        existingposition.recordstatus = 1
 															    }
 															    else{
 																    var customerposition = {
 																    		quote: req.body.quote,
-																    		recordstatusdate: new Date(),
+																    		recordstatusdate: new Date().getTime(),
 																    		recordstatus: 1,
 																    		costpershare: finalprice,
 																    		quantity: req.body.quantity,
@@ -1859,7 +1875,7 @@ exports.addaccount = function(req,res){
 						    	 var newhistory = {
 								    		description: 'Add account failed',
 								    	    actiontype: 'Add Account',
-								    	    recordstatusdate: new Date(),
+								    	    recordstatusdate: new Date().getTime(),
 								    	    recordstatus: 3
 								    };
 								    user.listofcustomerhistory.push(newhistory);
@@ -1880,7 +1896,7 @@ exports.addaccount = function(req,res){
 						    	var newhistory = {
 							    		description: 'Added account successfully',
 							    	    actiontype: 'Add Account',
-							    	    recordstatusdate: new Date(),
+							    	    recordstatusdate: new Date().getTime(),
 							    	    recordstatus: 1
 							    };
 							    user.listofcustomerhistory.push(newhistory);
@@ -1926,7 +1942,7 @@ exports.removeaccount = function(req,res){
 							   var newhistory = {
 							    		description: 'Account removal failed',
 							    	    actiontype: 'Removal Account',
-							    	    recordstatusdate: new Date(),
+							    	    recordstatusdate: new Date().getTime(),
 							    	    recordstatus: 3
 							    };
 							    user.listofcustomerhistory.push(newhistory);
@@ -1947,7 +1963,7 @@ exports.removeaccount = function(req,res){
 							   var newhistory = {
 							    		description: 'Account removal succeed',
 							    	    actiontype: 'Removal Account',
-							    	    recordstatusdate: new Date(),
+							    	    recordstatusdate: new Date().getTime(),
 							    	    recordstatus: 1
 							    };
 							    user.listofcustomerhistory.push(newhistory);
@@ -2036,7 +2052,7 @@ exports.withdrawal = function(req,res){
 																		    		description: 'Customer failed to have account updated with new balance: ' + (+money/100),
 																		    	    amount: (+money/100),
 																		    	    actiontype: 'Withdrawal',
-																		    	    recordstatusdate: new Date(),
+																		    	    recordstatusdate: new Date().getTime(),
 																		    	    recordstatus: 1
 																		    };
 																		    user.listoftransactions.push(newtransaction);
@@ -2058,7 +2074,7 @@ exports.withdrawal = function(req,res){
 																		    		description: 'Successfully refunded customer funds: ' + (+money/100),
 																		    	    amount: (+money/100),
 																		    	    actiontype: 'Withdrawal',
-																		    	    recordstatusdate: new Date(),
+																		    	    recordstatusdate: new Date().getTime(),
 																		    	    recordstatus: 1
 																		    };
 																		    user.listoftransactions.push(newtransaction);
@@ -2157,7 +2173,7 @@ exports.deposit = function(req,res){
 																    		description: 'Customer failed to have account updated with new balance: ' + (+money/100),
 																    	    amount: (+money/100),
 																    	    actiontype: 'Deposit',
-																    	    recordstatusdate: new Date(),
+																    	    recordstatusdate: new Date().getTime(),
 																    	    recordstatus: 1
 																    };
 																    user.listoftransactions.push(newtransaction);
@@ -2178,7 +2194,7 @@ exports.deposit = function(req,res){
 																	    		description: 'Succesfully deposited customer funds: ' + (+money/100),
 																	    	    amount: (+money/100),
 																	    	    actiontype: 'Deposit',
-																	    	    recordstatusdate: new Date(),
+																	    	    recordstatusdate: new Date().getTime(),
 																	    	    recordstatus: 1
 																	    };
 																	    user.listoftransactions.push(newtransaction);
