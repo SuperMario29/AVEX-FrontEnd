@@ -538,8 +538,9 @@ exports.cancelorder =  function(req,res){
 	};
 	
 //Thread for Submitting Individual Orders
-var submitorder =  Fiber(function(req,res){
+var submitorder =  Fiber(function(req){
     console.log('Submitting Order');
+    console.log(req.body);
     
     var finalcommission = 0.00;
     var finalprice = 0.00;
@@ -554,7 +555,7 @@ var submitorder =  Fiber(function(req,res){
 		if (err) {throw err;}
 		if (!user) {
 		    console.log('User was not found');
-			res.json({ success: false, message: 'User not found.' });
+			//res.json({ success: false, message: 'User not found.' });
 		} else if (user) {
 			console.log('User found!');
 			
@@ -564,7 +565,7 @@ var submitorder =  Fiber(function(req,res){
 					if (err){throw err;}
 					if(!balance){
 					    console.log('Balance Was Not found');
-						res.json({ success: false, message: 'Balance Was Not Found' });
+						//res.json({ success: false, message: 'Balance Was Not Found' });
 					}
 					else if(balance){
 						   console.log('Account Info:' + balance);
@@ -574,7 +575,7 @@ var submitorder =  Fiber(function(req,res){
 								if (err) {throw err;}
 								if (!setting) {
 								    console.log('Commission Was Not found');
-									res.json({ success: false, message: 'Commission Was Not Found' });
+									//res.json({ success: false, message: 'Commission Was Not Found' });
 								} else if (setting) {
 									console.log('Received Settings: ' + setting);
 								    console.log('Received Setting Commission: ' + setting.commission);
@@ -585,7 +586,7 @@ var submitorder =  Fiber(function(req,res){
 										if (err) {throw err;}
 										if (!athlete) {
 										    console.log('Athlete Was Not found');
-											res.json({ success: false, message: 'Athlete Was Not Found' });
+											//res.json({ success: false, message: 'Athlete Was Not Found' });
 										} else if (athlete) {
 										    console.log('Received Price: ' + athlete.currentprice);
 										    finalprice = athlete.currentprice;
@@ -689,7 +690,7 @@ var submitorder =  Fiber(function(req,res){
 																									   athletes.findOneAndUpdate(
 																								    		   { _id: athlete._id },
 																								    		   { $inc : { 'currentqueue' : 1 } });
-																										  res.json({ success: false, message: 'Pending Order Was Not Send to the Database' });
+																										  //res.json({ success: false, message: 'Pending Order Was Not Send to the Database' });
 																								  }
 																								  else if(userdata){
 																									  console.log('User Saved Successfully!');
@@ -713,7 +714,8 @@ var submitorder =  Fiber(function(req,res){
 																										   athletes.findOneAndUpdate(
 																									    		   { _id: athlete._id },
 																									    		   { $inc : { 'currentqueue' : 1 } });
-																									  res.json({ success: true, message: 'Pending Order Was Send to the Database' });																					  }
+																									  //res.json({ success: true, message: 'Pending Order Was Send to the Database' });																					  
+																								  	}
 																								});	
 																						  }
 																						});	
@@ -760,7 +762,7 @@ var submitorder =  Fiber(function(req,res){
 																							    athletes.findOneAndUpdate(
 																							    		   { _id: athlete._id },
 																							    		   { $inc : { 'currentqueue' : 1 } });
-																								res.json({ success: false, message: 'User not found.' });
+																								//res.json({ success: false, message: 'User not found.' });
 																							} else if (nextuser) {
 																								console.log('User found!');
 																								stripe.customers.retrieve(
@@ -772,7 +774,7 @@ var submitorder =  Fiber(function(req,res){
 																										    athletes.findOneAndUpdate(
 																										    		   { _id: athlete._id },
 																										    		   { $inc : { 'currentqueue' : 1 } });
-																											res.json({ success: false, message: 'Balance Was Not Found' });
+																											//res.json({ success: false, message: 'Balance Was Not Found' });
 																										}
 																										else if(nextuserbalance){
 																											   console.log('Account Info:' + nextuserbalance);
@@ -873,7 +875,7 @@ var submitorder =  Fiber(function(req,res){
 																		
 																		if(updateshares >= 0){
 																			remainingshares = updateshares;
-																			updateshares = +intitalQuantityRequest - +updateshares;
+																			updateshares = +initialQuantityRequest - +updateshares;
 																		    neworder.cost = +updateshares * +finalprice;
 																		    neworder.quantity = updateshares;
 																		    
@@ -898,7 +900,7 @@ var submitorder =  Fiber(function(req,res){
 																			var newbalance = parseInt((+accountbalance - +neworder.cost) * 100) * -1;
 																			
 																		    athlete.listorders.push(neworder);
-																		    athlete.availableshares = availableshares + -updateshares;
+																		    athlete.availableshares = +availableshares + -updateshares;
 																			
 																		    var newtransaction = {
 																		    		description: 'Buy Order: ' + athlete.name,
@@ -928,7 +930,7 @@ var submitorder =  Fiber(function(req,res){
 																		    	var newpositionquantity = +currentquantity + +updateshares;
 																		    	
 																		    	existingposition.quantity = newpositionquantity,
-																		        existingposition.costpershare = ((currentcostpershare * currentquantity) + (updateshares * finalprice)) / newpositionquantity,
+																		        existingposition.costpershare = ((+currentcostpershare * +currentquantity) + (+updateshares * +finalprice)) / +newpositionquantity,
 																		        existingposition.athletename = athlete.name,
 																		        existingposition.imageurl = athlete.imageurl,
 																		        existingposition.recordstatusdate = new Date(),
@@ -1005,7 +1007,8 @@ var submitorder =  Fiber(function(req,res){
 																															athletes.findOneAndUpdate(
 																														    		   { _id: athlete._id },
 																														    		   { $inc : { 'currentqueue' : 1 } });
-																															res.json({ success: true, message: 'Order sent to database.' });																						  }
+																															//res.json({ success: true, message: 'Order sent to database.' });																						 
+																														}
 																													});	
 																											  }
 																									  });
@@ -1020,7 +1023,7 @@ var submitorder =  Fiber(function(req,res){
 																			var newbalance = parseInt((+accountbalance - +neworder.cost) * 100) * -1;
 																			
 																		    athlete.listorders.push(neworder);
-																		    athlete.availableshares = availableshares + -updateshares;
+																		    athlete.availableshares = +availableshares + -updateshares;
 																			
 																		    var newtransaction = {
 																		    		description: 'Buy Order: ' + athlete.name,
@@ -1135,7 +1138,8 @@ var submitorder =  Fiber(function(req,res){
 																													athletes.findOneAndUpdate(
 																												    		   { _id: athlete._id },
 																												    		   { $inc : { 'currentqueue' : 1 } });
-																													res.json({ success: true, message: 'Order sent to database.' });																						  }
+																													//res.json({ success: true, message: 'Order sent to database.' });																						
+																												}
 																											});	
 																									  }
 																									});	
@@ -1150,7 +1154,7 @@ var submitorder =  Fiber(function(req,res){
 																			athletes.findOneAndUpdate(
 																		    		   { _id: athlete._id },
 																		    		   { $inc : { 'currentqueue' : 1 } });
-																			res.json({ success: false, message: 'Orders Was Not Found' });
+																			//res.json({ success: false, message: 'Orders Was Not Found' });
 																		}
 														    		}).sort({recordstatusdate : 1});	
 														    	}
@@ -1161,7 +1165,7 @@ var submitorder =  Fiber(function(req,res){
 														    		athletes.findOneAndUpdate(
 																    		   { _id: athlete._id },
 																    		   { $inc : { 'currentqueue' : 1 } });
-																	res.json({ success: false, message: 'Buy Order was not valid.' });
+																	//res.json({ success: false, message: 'Buy Order was not valid.' });
 														    	}	   
 														}
 
@@ -1200,7 +1204,7 @@ var submitorder =  Fiber(function(req,res){
 																				athletes.findOneAndUpdate(
 																			    		   { _id: athlete._id },
 																			    		   { $inc : { 'currentqueue' : 1 } });
-																	    		res.json({ success: false, message: 'Customer failed to have account updated with new balance' });
+																	    		//res.json({ success: false, message: 'Customer failed to have account updated with new balance' });
 																			}
 																			else if(balance){
 																				  console.log("Successfully refunded customer's funds: " + req.body.money);
@@ -1263,7 +1267,7 @@ var submitorder =  Fiber(function(req,res){
 																												athletes.findOneAndUpdate(
 																											    		   { _id: athlete._id },
 																											    		   { $inc : { 'currentqueue' : 1 } });
-																												res.json({ success: true, message: 'Order sent to database.' });
+																												//res.json({ success: true, message: 'Order sent to database.' });
 																										  }
 																										});	
 																								  }
@@ -1307,7 +1311,7 @@ var submitorder =  Fiber(function(req,res){
 																						  athletes.findOneAndUpdate(
 																					    		   { _id: athlete._id },
 																					    		   { $inc : { 'currentqueue' : 1 } });
-																							res.json({ success: false, message: 'Order was not sent to database.' });
+																							//res.json({ success: false, message: 'Order was not sent to database.' });
 																					  }
 																					  else if(userdata){
 																						  console.log('User Saved Successfully!');
@@ -1330,7 +1334,7 @@ var submitorder =  Fiber(function(req,res){
 																						    	athletes.findOneAndUpdate(
 																							    		   { _id: athlete._id },
 																							    		   { $inc : { 'currentqueue' : 1 } });
-																							res.json({ success: true, message: 'Order sent to database.' });
+																							//res.json({ success: true, message: 'Order sent to database.' });
 																					  }
 																					});	
 																			  }
@@ -1481,7 +1485,7 @@ var submitorder =  Fiber(function(req,res){
 															
 															if(updateshares >= 0){
 																remainingshares = updateshares;
-																updateshares = +intitalQuantityRequest - +updateshares;
+																updateshares = +initialQuantityRequest - +updateshares;
 															    neworder.cost = +updateshares * +finalprice;
 															    neworder.quantity = updateshares;
 															    
@@ -1490,7 +1494,7 @@ var submitorder =  Fiber(function(req,res){
 																		customerid: req.decoded._doc._id,
 																		quantity: remainingshares,
 																		actiontype: req.body.actiontype.toLowerCase(),
-																		cost: remainingshares * finalprice,
+																		cost: +remainingshares * +finalprice,
 																		commission: finalcommission,
 																		recordstatusdate: new Date(),
 																	    recordstatus: '1',
@@ -1506,7 +1510,7 @@ var submitorder =  Fiber(function(req,res){
 																var newbalance = parseInt((+accountbalance + +neworder.cost) * 100) * -1;
 																
 															    athlete.listorders.push(neworder);
-															    athlete.availableshares = availableshares + -updateshares;
+															    athlete.availableshares = +availableshares + -updateshares;
 																
 															    var newtransaction = {
 															    		description: 'Buy Order: ' + athlete.name,
@@ -1630,7 +1634,8 @@ var submitorder =  Fiber(function(req,res){
 																												athletes.findOneAndUpdate(
 																											    		   { _id: athlete._id },
 																											    		   { $inc : { 'currentqueue' : 1 } });
-																												res.json({ success: true, message: 'Order sent to database.' });																						  }
+																												//res.json({ success: true, message: 'Order sent to database.' });																						  
+																											}
 																										});	
 																								  }
 																						  });
@@ -1759,7 +1764,8 @@ var submitorder =  Fiber(function(req,res){
 																										athletes.findOneAndUpdate(
 																									    		   { _id: athlete._id },
 																									    		   { $inc : { 'currentqueue' : 1 } });
-																										res.json({ success: true, message: 'Order sent to database.' });																						  }
+																										//res.json({ success: true, message: 'Order sent to database.' });																						  
+																								  }
 																								});	
 																						  }
 																						});	
@@ -1774,7 +1780,7 @@ var submitorder =  Fiber(function(req,res){
 																athletes.findOneAndUpdate(
 															    		   { _id: athlete._id },
 															    		   { $inc : { 'currentqueue' : 1 } });
-																res.json({ success: false, message: 'Orders Was Not Found' });
+																//res.json({ success: false, message: 'Orders Was Not Found' });
 															}
 											    		}).sort({recordstatusdate : 1});	
 												    }
@@ -1785,7 +1791,7 @@ var submitorder =  Fiber(function(req,res){
 										    	athletes.findOneAndUpdate(
 											    		   { _id: athlete._id },
 											    		   { $inc : { 'currentqueue' : 1 } });
-												res.json({ success: false, message: 'Sell Order was not valid.' });
+												//res.json({ success: false, message: 'Sell Order was not valid.' });
 										    }
 										}
 									);
@@ -1798,7 +1804,7 @@ var submitorder =  Fiber(function(req,res){
 
 //Submit Order for Customer
 exports.submitorder = function(req,res){
-	submitorder.run();
+	submitorder.run(req);
 }
 
 //Get Customer's Account Balance
