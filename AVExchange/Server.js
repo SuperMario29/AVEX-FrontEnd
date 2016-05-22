@@ -88,7 +88,7 @@ app.post('/submitRegistration', function(req, res) {
 						emailaddress: email,
 						password: password,
 						stripeaccount: customer.id.trim(),
-						recordstatusdate: new Date(),
+						recordstatusdate: new Date().getTime(),
 					    recordstatus: '1',
 						admin: false 
 					});
@@ -104,7 +104,7 @@ app.post('/submitRegistration', function(req, res) {
 								var data = new datastore({ 
 									description: 'New Customer Created: ' + user.name,
 						    	    actiontype: 'New Customer',
-						    	    recordstatusdate: new Date(),
+						    	    recordstatusdate: new Date().getTime(),
 						    	    recordstatus: 1 
 								});
 									
@@ -244,7 +244,7 @@ app.post('/emailResetPassword', function(req, res){
 	    var newhistory = {
 	    		description: 'Reset Password successfully',
 	    	    actiontype: 'Password Update',
-	    	    recordstatusdate: new Date(),
+	    	    recordstatusdate: new Date().getTime(),
 	    	    recordstatus: 1
 	    };
 	    user.listofcustomerhistory.push(newhistory);
