@@ -88,7 +88,7 @@ app.post('/submitRegistration', function(req, res) {
 						emailaddress: email,
 						password: password,
 						stripeaccount: customer.id.trim(),
-						recordstatusdate: new Date().getTime(),
+						recordstatusdate: new Date(),
 					    recordstatus: '1',
 						admin: false 
 					});
@@ -104,7 +104,7 @@ app.post('/submitRegistration', function(req, res) {
 								var data = new datastore({ 
 									description: 'New Customer Created: ' + user.name,
 						    	    actiontype: 'New Customer',
-						    	    recordstatusdate: new Date().getTime(),
+						    	    recordstatusdate: new Date(),
 						    	    recordstatus: 1 
 								});
 									
@@ -241,13 +241,12 @@ app.post('/emailResetPassword', function(req, res){
   	  else if(user){
     	console.log('Send Email Password Reset Successfully');
     	user.password = passwordHash.generate(passwoid(8));
-	    var newhistory = {
-	    		description: 'Reset Password successfully',
-	    	    actiontype: 'Password Update',
-	    	    recordstatusdate: new Date().getTime(),
-	    	    recordstatus: 1
-	    };
-	    user.listofcustomerhistory.push(newhistory);
+	    user.listofcustomerhistory.push({
+    		description: 'Reset Password successfully',
+    	    actiontype: 'Password Update',
+    	    recordstatusdate: new Date(),
+    	    recordstatus: 1
+    });
     	
     	// setup e-mail data with unicode symbols
     	var mailOptions = {
