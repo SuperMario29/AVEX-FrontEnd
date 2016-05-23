@@ -160,6 +160,32 @@ app.get('/getsettings', function(req,res){
 });
 });
 
+app.get('/isMarketOpen', function(req,res){
+	console.log('Get Settings');
+	settings.findOne(function(err, setting) {
+		if (err) {throw err;}
+		if (!setting) {
+		    console.log('Nothing was found');
+			res.json({ success: false, message: 'Nothing was found.' });
+		} else if (setting) {
+		    console.log('Received Settings: ' + setting);
+		    var marketopenhour = parseInt(setting.marketopen.split(":",1));
+		    var marketclosehour = parseInt(setting.marketclose.split(":",1));
+		    var marketopentime = new Date();
+		    var marketclosetime = new Date();
+		    marketopentime.setHour(+marketopenhour);
+		    marketclosetime.setHour(+marketclosehour);
+		    var currentdate = new Date();
+		    if(currentdate.getTime() >= marketopentime.getTime() && currentdate.getTime <= marketclosetime.getTime()){
+				res.json({ success: true, message: 'Open' });
+		    }
+		    else{
+		    	res.json({ success: true, message: 'Closed' });
+		    }
+		}
+});
+});
+
 //Log User Into Account
 app.get('/userLogin', function(req, res) {
 

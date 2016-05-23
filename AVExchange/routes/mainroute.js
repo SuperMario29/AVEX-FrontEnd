@@ -75,6 +75,21 @@ exports.portfolio = function(req,res){
 			res.json({ success: false, message: 'User not found.' });
 		} else if (user) {
 			console.log('User found!');
+			  user.listofathletes.each (function (error, doc){
+			        if (error) {throw err;}
+			        if (!doc){
+			            console.log('Unable To Get Position Document');
+			        }
+			        else if(doc){
+			        	athletes.findById(doc.athleteid, function(err, athlete) {
+			        		if (err) {throw err;}
+			        		if (!athlete) {
+			        		    console.log('User was not found');
+			        		} else if (athlete) {
+			        			console.log('User found!');
+			        			doc.currentprice = athlete.currentprice;
+			        		}
+			    });			
 			res.json(user.listofathletes);		
 		}
 	});
@@ -546,6 +561,7 @@ var cancelorder =  Fiber(function(req){
 //Cancel Order for Customer
 exports.cancelorder = function(req,res){
 		cancelorder.run(req);
+		res.json({ success: true, message: 'Order submitted successfully' });
 }
 	
 //Thread for Submitting Individual Orders
@@ -557,6 +573,7 @@ var submitorder =  Fiber(function(req){
     var finalprice = 0.00;
     var availableshares = 0.00;
     var totalshares = 0.00;
+    var isMarketOpen = false;
     
     var quote = req.body.quote.trim();
     var quantity = req.body.quantity.trim();
@@ -592,7 +609,18 @@ var submitorder =  Fiber(function(req){
 								    console.log('Received Setting Commission: ' + setting.commission);
 								    finalcommission = setting.commission;
 								    console.log('Commission: ' + finalcommission);
-								    
+								    console.log('Received Settings: ' + setting);
+								    var marketopenhour = parseInt(setting.marketopen.split(":",1));
+								    var marketclosehour = parseInt(setting.marketclose.split(":",1));
+								    var marketopentime = new Date();
+								    var marketclosetime = new Date();
+								    var is
+								    marketopentime.setHour(+marketopenhour);
+								    marketclosetime.setHour(+marketclosehour);
+								    var currentdate = new Date();
+								    if(currentdate.getTime() >= marketopentime.getTime() && currentdate.getTime <= marketclosetime.getTime()){
+										isMarketOpen = true;
+								    }								    
 								    
 									athletes.findOne({quote: quote},function(err,athlete){
 										if (err) {throw err;}
@@ -658,7 +686,7 @@ var submitorder =  Fiber(function(req){
 														    	{
 														    		orders.find({$and : [ {$or: [ { athleteid: athleteid }, { extathleteid: externalathleteid } ]}, {recordstatus : {$ne : 3}}, {actiontype: 'sell'}  ]},function(err,order){
 														    			if (err) {throw err;}
-																		if (!order) {
+																		if (!order || isMarketOpen == false) {
 																		    console.log('Orders Were Not found');
 																		    
 																		    user.listoftransactions.push({
@@ -732,7 +760,7 @@ var submitorder =  Fiber(function(req){
 																				  }
 																				});
 																		} 
-																		else if (order && typeof order !== 'undefined' && order.length > 0) {
+																		else if (order && typeof order !== 'undefined' && order.length > 0 && isMarketOpen == true) {
 																				
 																		console.log('Orders: ' + order);											
 														    			console.log('Order Quantity: ' + -updateshares);
@@ -772,7 +800,6 @@ var submitorder =  Fiber(function(req){
 																							    athletes.findOneAndUpdate(
 																							    		   { _id: athlete._id },
 																							    		   { $inc : { 'currentqueue' : 1 } });
-																								//res.json({ success: false, message: 'User not found.' });
 																							} else if (nextuser) {
 																								console.log('User found!');
 																								stripe.customers.retrieve(
@@ -784,7 +811,6 @@ var submitorder =  Fiber(function(req){
 																										    athletes.findOneAndUpdate(
 																										    		   { _id: athlete._id },
 																										    		   { $inc : { 'currentqueue' : 1 } });
-																											//res.json({ success: false, message: 'Balance Was Not Found' });
 																										}
 																										else if(nextuserbalance){
 																											   console.log('Account Info:' + nextuserbalance);
@@ -1143,8 +1169,7 @@ var submitorder =  Fiber(function(req){
 																													console.log('Order sent to database');
 																													athletes.findOneAndUpdate(
 																												    		   { _id: athlete._id },
-																												    		   { $inc : { 'currentqueue' : 1 } });
-																													//res.json({ success: true, message: 'Order sent to database.' });																						
+																												    		   { $inc : { 'currentqueue' : 1 } });																				
 																												}
 																											});	
 																									  }
@@ -1160,7 +1185,6 @@ var submitorder =  Fiber(function(req){
 																			athletes.findOneAndUpdate(
 																		    		   { _id: athlete._id },
 																		    		   { $inc : { 'currentqueue' : 1 } });
-																			//res.json({ success: false, message: 'Orders Was Not Found' });
 																		}
 														    		}).sort({recordstatusdate : 1});	
 														    	}
@@ -1171,7 +1195,6 @@ var submitorder =  Fiber(function(req){
 														    		athletes.findOneAndUpdate(
 																    		   { _id: athlete._id },
 																    		   { $inc : { 'currentqueue' : 1 } });
-																	//res.json({ success: false, message: 'Buy Order was not valid.' });
 														    	}	   
 														}
 
@@ -1195,7 +1218,7 @@ var submitorder =  Fiber(function(req){
 											    	    recordstatus: 1
 											    });
 												    
-												    if(!isresellable){
+												    if(!isresellable && isMarketOpen == true){
 												    	var x = (+neworder.quantity / +totalshares);
 												    	athlete.currentprice = +finalprice - (+finalprice * +x);
 												    	
@@ -1209,7 +1232,6 @@ var submitorder =  Fiber(function(req){
 																				athletes.findOneAndUpdate(
 																			    		   { _id: athlete._id },
 																			    		   { $inc : { 'currentqueue' : 1 } });
-																	    		//res.json({ success: false, message: 'Customer failed to have account updated with new balance' });
 																			}
 																			else if(balance){
 																				  console.log("Successfully refunded customer's funds: " + req.body.money);
@@ -1272,7 +1294,6 @@ var submitorder =  Fiber(function(req){
 																												athletes.findOneAndUpdate(
 																											    		   { _id: athlete._id },
 																											    		   { $inc : { 'currentqueue' : 1 } });
-																												//res.json({ success: true, message: 'Order sent to database.' });
 																										  }
 																										});	
 																								  }
@@ -1282,13 +1303,12 @@ var submitorder =  Fiber(function(req){
 																			}
 																		});	
 																}
-												    }
-												    else{	
+												    else
+												    {	
 												    	orders.find({ $and : [ {$or: [ { athleteid: athleteid }, { extathleteid: externalathleteid } ]}, {recordstatus : {$ne : 3}}, {actiontype: 'buy'}  ]},function(err,order){
 											    			if (err) {throw err;}
-															if (!order) {
+															if (!order || isMarketOpen == false) {
 															    console.log('Orders Were Not found');
-															    
 															    athlete.save(function (err,athletedata) {
 																	  if (err) {throw err;}
 																	  if(!athletedata){
@@ -1347,7 +1367,7 @@ var submitorder =  Fiber(function(req){
 																	  }
 																	});
 															} 
-															else if (order && typeof order !== 'undefined' && order.length > 0) {
+															else if (order && typeof order !== 'undefined' && order.length > 0 && isMarketOpen == true) {
 																	
 															var updateshares = neworder.quantity;
 															var initialQuantityRequest = updateshares;
@@ -1780,31 +1800,28 @@ var submitorder =  Fiber(function(req){
 																athletes.findOneAndUpdate(
 															    		   { _id: athlete._id },
 															    		   { $inc : { 'currentqueue' : 1 } });
-																//res.json({ success: false, message: 'Orders Was Not Found' });
 															}
 											    		}).sort({recordstatusdate : 1});	
 												    }
-										    })
-								}
+										    }
 										    else{
-										    	console.log('Sell Order was not valid');
+										    	console.log('Order was not valid');
 										    	athletes.findOneAndUpdate(
 											    		   { _id: athlete._id },
 											    		   { $inc : { 'currentqueue' : 1 } });
-												//res.json({ success: false, message: 'Sell Order was not valid.' });
 										    }
-										}
-									);
+										});
 								}
 							}); 
 					}
 			});
 		}
-	);
+	});
 
 //Submit Order for Customer
 exports.submitorder = function(req,res){
 	submitorder.run(req);
+	res.json({ success: true, message: 'Order submitted successfully' });
 }
 
 //Get Customer's Account Balance

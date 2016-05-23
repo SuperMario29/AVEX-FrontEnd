@@ -6,7 +6,9 @@ var Schema = mongoose.Schema;
 var settingsSchema = new Schema({ 
     minpassword: Number,
 	timeoutwindow: Number,
-	commission: Number
+	commission: Number,
+	marketopen: String,
+	marketclose: String
 });
 
 mongoose.model('settings',settingsSchema);
