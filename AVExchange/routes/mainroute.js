@@ -74,8 +74,8 @@ exports.portfolio = function(req,res){
 			res.json({ success: false, message: 'User not found.' });
 		} else if (user) {
 			console.log('User found!');
-			user.listofathletes.each (function (error, doc){
-				if (error) {throw err;}
+			user.listofathletes.forEach (function (doc){
+				if (err) {throw err;}
 				if (!doc){
 					console.log('Unable To Get Position Document');
 				}
@@ -88,10 +88,10 @@ exports.portfolio = function(req,res){
 							console.log('User found!');
 							doc.currentprice = athlete.currentprice;
 						}
-					});			
-					res.json(user.listofathletes);		
+					});				
 				}
 			});
+			res.json(user.listofathletes);	
 		};
 	});
 };
