@@ -74,24 +74,32 @@ exports.portfolio = function(req,res){
 			res.json({ success: false, message: 'User not found.' });
 		} else if (user) {
 			console.log('User found!');
+			var listofathleteids = [];
+			var listofathletes = [];
 			user.listofathletes.forEach (function (doc){
-				if (err) {throw err;}
-				if (!doc){
-					console.log('Unable To Get Position Document');
-				}
-				else if(doc){
-					athletes.findById(doc.athleteid, function(err, athlete) {
-						if (err) {throw err;}
-						if (!athlete) {
-							console.log('User was not found');
-						} else if (athlete) {
-							console.log('User found!');
-							doc.currentprice = athlete.currentprice;
-						}
-					});				
+				if(doc.recordstatus != 3 && doc.recordstatus != 4){
+					listofathleteids.push(doc.athleteid);
+					listofathletes.push(doc);
 				}
 			});
-			res.json(user.listofathletes);	
+			console.log('Athlete Array: ' + listofathleteids);
+			athletes.find({ _id: { $in: listofathleteids}}, function(err, athlete) {
+				if (err) {throw err;}
+				if (!athlete) {
+					console.log('Athletes were not found');
+					res.json(listofathletes);	
+				} else if (athlete) {
+					console.log('Athletes were found!');
+					athlete.forEach (function (a){
+						listofathletes.forEach (function (doc){
+							if(doc.athleteid == a._id){
+								doc.currentprice = a.currentprice;
+							}
+						});
+					});
+					res.json(listofathletes);	
+				}
+			});
 		};
 	});
 };
