@@ -173,8 +173,8 @@ app.get('/isMarketOpen', function(req,res){
 		    var marketclosehour = parseInt(setting.marketclose.split(":",1));
 		    var marketopentime = new Date();
 		    var marketclosetime = new Date();
-		    marketopentime.setHour(+marketopenhour);
-		    marketclosetime.setHour(+marketclosehour);
+		    marketopentime.setHours(+marketopenhour);
+		    marketclosetime.setHours(+marketclosehour);
 		    var currentdate = new Date();
 		    if(currentdate.getTime() >= marketopentime.getTime() && currentdate.getTime <= marketclosetime.getTime()){
 				res.json({ success: true, message: 'Open' });

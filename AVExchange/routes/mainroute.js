@@ -137,10 +137,9 @@ exports.getbalancehistory = function(req,res){
 //Update Password
 exports.updatepass =  function(req,res){
 	console.log('Update Password: ' + req.decoded._doc.emailaddress);
-
-	customers.findById(req.decoded._doc._id, function (err, success) {
+	customers.findById(req.decoded._doc._id, function (err, user) {
 		if (err) {throw err;};
-		if(!success){
+		if(!user){
 			console.log('Updated Password failed');
 			user.listofcustomerhistory.push({
 				description: 'Updated Password failed',
@@ -148,9 +147,12 @@ exports.updatepass =  function(req,res){
 				recordstatusdate: new Date(),
 				recordstatus: 1
 			});
+			user.save(function(err) {
+				if (err) {throw err;}	
+			});
 			res.json({ success: false, message: 'Updated Password failed.' });
 		}
-		else if(success){
+		else if(user){
 			console.log('Updated Password successfully');
 			user.password = passwordHash.generate(req.body.password);
 			user.listofcustomerhistory.push({
@@ -158,6 +160,9 @@ exports.updatepass =  function(req,res){
 				actiontype: 'Password Update',
 				recordstatusdate: new Date(),
 				recordstatus: 1
+			});
+			user.save(function(err) {
+				if (err) {throw err;}	
 			});
 			res.json({ success: true, message: 'Updated Password successfully' });
 		}
@@ -175,6 +180,15 @@ exports.updatecustomer =  function(req,res){
 		if (err) {throw err;};
 		if(!user){
 			console.log('Updated User Account failed');
+			user.listofcustomerhistory.push({
+				description: 'Account update failed',
+				actiontype: 'Update Account',
+				recordstatusdate: new Date(),
+				recordstatus: 1
+			});
+			user.save(function(err) {
+				if (err) {throw err;}	
+			});
 			res.json({ success: false, message: 'Updated User Account failed' }); 
 		}
 		else if(user){
@@ -188,6 +202,9 @@ exports.updatecustomer =  function(req,res){
 					recordstatusdate: new Date(),
 					recordstatus: 1
 				});
+				user.save(function(err) {
+					if (err) {throw err;}	
+				});
 				res.json({ success: true, message: 'Updated User Account successfully' });
 			}
 			else{
@@ -195,21 +212,53 @@ exports.updatecustomer =  function(req,res){
 					emailaddress: email
 				}, function(err, user) {
 					if (err) {throw err;}
-
 					if (!user) {
 						console.log('Email is available');
-						console.log('Updated User Account successfully');
-						user.emailaddress = email;
-						user.name = name;
+						console.log('Updated User Account succeed');
+						stripe.customers.update(user.stripeaccount, {
+							  email: email
+							}, function(err, customer) {
+							  if(err){throw err;}
+							  if(!customer){
+								  user.name = name;
+								  user.listofcustomerhistory.push({
+										description: 'Account update failed.Unable To Locate Stripe Account',
+										actiontype: 'Update Account',
+										recordstatusdate: new Date(),
+										recordstatus: 1
+									});
+									user.save(function(err) {
+										if (err) {throw err;}	
+									});
+									res.json({ success: false, message: 'Updated User Account failed' });
+							  }
+							  else if(customer){
+									user.emailaddress = email;
+									user.name = name;
+									user.listofcustomerhistory.push({
+										description: 'Account update succeed',
+										actiontype: 'Update Account',
+										recordstatusdate: new Date(),
+										recordstatus: 1
+									});
+									user.save(function(err) {
+										if (err) {throw err;}	
+									});
+									res.json({ success: true, message: 'Updated User Account successfully' });
+							  }
+							});
+
+					} else if (user) {
+						console.log('Email is not available');
 						user.listofcustomerhistory.push({
-							description: 'Account update succeed',
+							description: 'Account update failed.Email Not Available',
 							actiontype: 'Update Account',
 							recordstatusdate: new Date(),
 							recordstatus: 1
+						});						
+						user.save(function(err) {
+							if (err) {throw err;}	
 						});
-						res.json({ success: true, message: 'Updated User Account successfully' });
-					} else if (user) {
-						console.log('Email is not available');
 						res.json({ success: false, emailaddress: 'Not available' });
 					}
 				});
@@ -332,7 +381,7 @@ exports.markettrends = function(req,res){
 			console.log('Nothing was found');
 			res.json({ success: false, message: 'Nothing was found.' });
 		} else if (markettrend) {
-			console.log('Received Results: ' + markettrend);
+			console.log('Received Results');
 			res.json(markettrend);
 		}		
 	});
@@ -602,7 +651,6 @@ var submitorder =  Fiber(function(req){
 						if (err){throw err;}
 						if(!balance){
 							console.log('Balance Was Not found');
-							//res.json({ success: false, message: 'Balance Was Not Found' });
 						}
 						else if(balance){
 							console.log('Account Info:' + balance);
@@ -612,7 +660,6 @@ var submitorder =  Fiber(function(req){
 								if (err) {throw err;}
 								if (!setting) {
 									console.log('Commission Was Not found');
-									//res.json({ success: false, message: 'Commission Was Not Found' });
 								} else if (setting) {
 									console.log('Received Settings: ' + setting);
 									console.log('Received Setting Commission: ' + setting.commission);
@@ -623,9 +670,8 @@ var submitorder =  Fiber(function(req){
 									var marketclosehour = parseInt(setting.marketclose.split(":",1));
 									var marketopentime = new Date();
 									var marketclosetime = new Date();
-									var is
-									marketopentime.setHour(+marketopenhour);
-									marketclosetime.setHour(+marketclosehour);
+									marketopentime.setHours(+marketopenhour);
+									marketclosetime.setHours(+marketclosehour);
 									var currentdate = new Date();
 									if(currentdate.getTime() >= marketopentime.getTime() && currentdate.getTime <= marketclosetime.getTime()){
 										isMarketOpen = true;
@@ -635,7 +681,6 @@ var submitorder =  Fiber(function(req){
 										if (err) {throw err;}
 										if (!athlete) {
 											console.log('Athlete Was Not found');
-											//res.json({ success: false, message: 'Athlete Was Not Found' });
 										} else if (athlete) {
 											var currentqueue = athletes.findOneAndUpdate(
 													{ _id: athlete._id },
