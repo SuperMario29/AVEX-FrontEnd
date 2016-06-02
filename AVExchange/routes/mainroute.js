@@ -464,7 +464,7 @@ exports.updateorder =  function(req,res){
 							console.log('Final Price: ' + finalprice);
 							console.log('Final Commission: ' + finalcommission);
 
-							athlete.availableshares = availableshares + -order.quantity;
+							athlete.availableshares = +availableshares + -order.quantity;
 							order.recordstatus = 4;
 							order.recordstatusdate = new Date();
 
@@ -545,7 +545,7 @@ var cancelorder =  Fiber(function(req){
 							console.log('Final Price: ' + finalprice);
 							console.log('Final Commission: ' + finalcommission);
 
-							athlete.availableshares = availableshares + -order.quantity;
+							athlete.availableshares = +availableshares + -order.quantity;
 							order.recordstatus = 4;
 							order.recordstatusdate = new Date();
 
@@ -707,7 +707,7 @@ var submitorder =  Fiber(function(req){
 											for(i in user.listofathletes){
 												//username is the variable of the username of the like you want to find
 												if(user.listofathletes[i].athleteid == athlete._id){
-													var existingposition = user.listofathletes[i];
+													existingposition = user.listofathletes[i];
 													console.log('Found Athlete! Name:  ' + existingposition);
 												}
 											}
@@ -738,7 +738,7 @@ var submitorder =  Fiber(function(req){
 
 												if(+availableshares > +neworder.quantity && balance.account_balance)
 												{
-													orders.find({$and : [ {$or: [ { athleteid: athleteid }, { extathleteid: externalathleteid } ]}, {recordstatus : {$ne : 3}}, {actiontype: 'sell'}  ]},function(err,order){
+													orders.find({$and : [ {$or: [ { athleteid: athleteid }, { extathleteid: externalathleteid } ]}, {recordstatus : {$ne : 3}},{recordstatus : {$ne : 4}}, {actiontype: 'sell'}  ]},function(err,order){
 														if (err) {throw err;}
 														if (!order || isMarketOpen == false) {
 															console.log('Orders Were Not found');
@@ -875,7 +875,7 @@ var submitorder =  Fiber(function(req){
 																									var nextcurrentcostpershare = nextposition.costpershare;
 																									var nextrecordstatus = 2;
 
-																									if(nextOrder == 0){
+																									if(nextOrder.quantity == 0){
 																										nextrecordstatus = 3;
 																									}
 
@@ -1351,7 +1351,7 @@ var submitorder =  Fiber(function(req){
 											}
 											else
 											{	
-												orders.find({ $and : [ {$or: [ { athleteid: athleteid }, { extathleteid: externalathleteid } ]}, {recordstatus : {$ne : 3}}, {actiontype: 'buy'}  ]},function(err,order){
+												orders.find({ $and : [ {$or: [ { athleteid: athleteid }, { extathleteid: externalathleteid } ]}, {recordstatus : {$ne : 3}},{recordstatus : {$ne : 3}}, {actiontype: 'buy'}  ]},function(err,order){
 													if (err) {throw err;}
 													if (!order || isMarketOpen == false) {
 														console.log('Orders Were Not found');
