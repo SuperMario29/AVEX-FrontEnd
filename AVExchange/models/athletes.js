@@ -60,7 +60,7 @@ var athleteSchema = new Schema({
     listorders : [order],
     athleteid: Number,
     currentqueue: Number,
-    nextqueuenumber: Number
+    nextqueue: Number
 });
 
 mongoose.model('athletes',athleteSchema);
