@@ -407,7 +407,7 @@ exports.ordersbyathlete = function(req,res){
 exports.getcustomerorders = function(req,res){
 	var athleteid = req.query.athleteid.trim();
 	console.log('Get Customer Orders By Athlete; Athlete ID:' + athleteid);
-	orders.find({athleteid: athleteid, customerid: req.decoded._doc._id}, function(err, order) {
+	orders.find({athleteid: athleteid, customerid: req.decoded._doc._id, recordstatus: {$ne : 3}, recordstatus : {$ne : 4}}, function(err, order) {
 		if (err) {throw err;}
 		if (!order) {
 			console.log('Nothing was found');
@@ -495,12 +495,13 @@ exports.updateorder =  function(req,res){
 
 //User Thread for Cancelling Order
 var cancelorder =  Fiber(function(req){
-	console.log('Cancelling Order');
-
 	var finalcommission = 0.00;
 	var finalprice = 0.00;
 	var availableshares = 0.00;
 	var totalshares = 0.00;
+	var orderid = req.body.orderid.trim();
+	
+	console.log('Cancelling Order:' + orderid);
 
 	customers.findById(req.decoded._doc._id, function(err, user) {
 		if (err) {throw err;}
@@ -744,7 +745,7 @@ var submitorder =  Fiber(function(req){
 															console.log('Orders Were Not found');
 
 															user.listoftransactions.push({
-																description: 'Buy Order: ' + athlete.name,
+																description: '(Pending) Buy Order: ' + athlete.name,
 																amount: neworder.cost,
 																actiontype: 'Buy',
 																recordstatusdate: new Date(),
@@ -1469,7 +1470,7 @@ var submitorder =  Fiber(function(req){
 																								var nextcurrentcostpershare = nextposition.costpershare;
 																								var nextrecordstatus = 2;
 
-																								if(nextOrder == 0){
+																								if(nextOrder.quantity == 0){
 																									nextrecordstatus = 3;
 																								}
 
@@ -1581,9 +1582,9 @@ var submitorder =  Fiber(function(req){
 															athlete.availableshares = +availableshares + -updateshares;
 
 															user.listoftransactions.push({
-																description: 'Buy Order: ' + athlete.name,
+																description: 'Sold Order: ' + athlete.name,
 																amount: neworder.cost,
-																actiontype: 'Buy',
+																actiontype: 'Sell',
 																recordstatusdate: new Date(),
 																recordstatus: 1
 															});
@@ -1718,9 +1719,9 @@ var submitorder =  Fiber(function(req){
 															athlete.availableshares = +availableshares + -updateshares;
 
 															user.listoftransactions.push({
-																description: 'Buy Order: ' + athlete.name,
+																description: 'Sold Order: ' + athlete.name,
 																amount: neworder.cost,
-																actiontype: 'Buy',
+																actiontype: 'Sell',
 																recordstatusdate: new Date(),
 																recordstatus: 1
 															});
