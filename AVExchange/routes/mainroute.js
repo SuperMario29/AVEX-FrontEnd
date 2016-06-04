@@ -600,9 +600,6 @@ var cancelorder =  Fiber(function(req){
 														}
 														console.log('Message sent: ' + info.response);
 													});
-
-
-													res.json({ success: true, message: 'Cancellation Order sent to database.' });
 												}
 											});	
 										}
@@ -672,11 +669,18 @@ var submitorder =  Fiber(function(req){
 									var marketopentime = new Date();
 									var marketclosetime = new Date();
 									marketopentime.setHours(+marketopenhour);
+									console.log("Market Open:" + marketopentime);
 									marketclosetime.setHours(+marketclosehour);
+									console.log("Market Closed:" + marketclosetime);
 									var currentdate = new Date();
+									console.log("Current Time:" + currentdate);
 									if(currentdate.getTime() >= marketopentime.getTime() && currentdate.getTime <= marketclosetime.getTime()){
+										console.log("Market Is Open!!");
 										isMarketOpen = true;
 									}								    
+									else{
+										console.log("Market Is Closed!!");
+									}
 
 									athletes.findOne({quote: quote},function(err,athlete){
 										if (err) {throw err;}
