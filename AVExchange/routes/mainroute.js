@@ -372,13 +372,7 @@ exports.nbaboxscorestats = function(req,res){
 		}
 		else if(response){
 			console.log('Received Results: ' + body);
-			body.success = true;
-			body.message = "Received Box Stats";
-			res.json({
-				success: true,
-				message: "Received Box Stats",
-				stats: body
-			});
+			res.json({stats: body});
 		}
 	});
 };
@@ -405,9 +399,7 @@ exports.nbaadvancedstats = function(req,res){
 			console.log('Received Results: ' + body);
 			body.success = true;
 			body.message = "Received Results";
-			res.json({success: true,
-				message: "Received Box Stats",
-				stats: body});
+			res.json({stats: body});
 		}
 	});
 };
