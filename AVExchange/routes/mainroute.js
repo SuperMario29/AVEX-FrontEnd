@@ -99,6 +99,7 @@ exports.portfolio = function(req,res){
 					});
 					listofathletes.success = true;
 					listofathletes.message = "List of Athletes Received";
+					console.log(listofathletes);
 					res.json(listofathletes);	
 				}
 			});
@@ -118,6 +119,7 @@ exports.getcustomerhistory = function(req,res){
 			console.log('User found!');
 			user.listofcustomerhistory.success = true;
 			user.listofcustomerhistory.message = "Customer History Received";
+			console.log(user.listofcustomerhistory);
 			res.json(user.listofcustomerhistory);		
 		}
 	});
@@ -135,6 +137,7 @@ exports.getbalancehistory = function(req,res){
 			console.log('User found!');
 			user.listoftransactions.success = true;
 			user.listoftransactions.message = "Transaction History Received";
+			console.log(user.listransactions);
 			res.json(user.listoftransactions);		
 		}
 	});
