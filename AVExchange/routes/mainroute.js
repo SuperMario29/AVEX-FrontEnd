@@ -97,6 +97,8 @@ exports.portfolio = function(req,res){
 							}
 						});
 					});
+					listofathletes.success = true;
+					listofathletes.message = "List of Athletes Received";
 					res.json(listofathletes);	
 				}
 			});
@@ -114,6 +116,8 @@ exports.getcustomerhistory = function(req,res){
 			res.json({ success: false, message: 'User not found.' });
 		} else if (user) {
 			console.log('User found!');
+			user.listofcustomerhistory.success = true;
+			user.listofcustomerhistory.message = "Customer History Received";
 			res.json(user.listofcustomerhistory);		
 		}
 	});
@@ -129,6 +133,8 @@ exports.getbalancehistory = function(req,res){
 			res.json({ success: false, message: 'User not found.' });
 		} else if (user) {
 			console.log('User found!');
+			user.listoftransactions.success = true;
+			user.listoftransactions.message = "Transaction History Received";
 			res.json(user.listoftransactions);		
 		}
 	});
@@ -277,6 +283,8 @@ exports.market = function(req,res){
 			res.json({ success: false, message: 'Nothing was found.' });
 		} else if (market) {
 			console.log('Received Results!!');
+			market.success = true;
+			market.message = "Market Received";
 			res.json(market);
 		}		
 	});
@@ -303,6 +311,8 @@ exports.search = function(req,res){
 			data.save(function(err) {
 				if (err) {throw err;}	
 			});
+			athlete.success = true;
+			athlete.message = "Search Results Received";
 			res.json(athlete);
 		}		
 	});
@@ -318,6 +328,8 @@ exports.quotes =  function(req,res){
 			res.json({ success: false, message: 'Nothing was found.' });
 		} else if (quotes) {
 			console.log('Received quotes!!');
+			quotes.success = true;
+			quotes.message = "Search Results Received";
 			res.json(quotes);
 		}		
 	});
@@ -342,6 +354,8 @@ exports.nbaboxscorestats = function(req,res){
 		}
 		else if(response){
 			console.log('Received Results: ' + body);
+			body.success = true;
+			body.message = "Received Box Stats";
 			res.json(body);
 		}
 
@@ -368,6 +382,8 @@ exports.nbaadvancedstats = function(req,res){
 		}
 		else if(response){
 			console.log('Received Results: ' + body);
+			body.success = true;
+			body.message = "Received Results";
 			res.json(body);
 		}
 	});
@@ -382,6 +398,8 @@ exports.markettrends = function(req,res){
 			res.json({ success: false, message: 'Nothing was found.' });
 		} else if (markettrend) {
 			console.log('Received Results');
+			markettrend.success = true;
+			markettrend.message = "Returned MarketTrends";
 			res.json(markettrend);
 		}		
 	});
@@ -398,6 +416,8 @@ exports.ordersbyathlete = function(req,res){
 			res.json({ success: false, message: 'Nothing was found.' });
 		} else if (order) {
 			console.log('Received Results!!');
+			order.success = true;
+			order.message = "Returned Orders";
 			res.json(order);
 		}		
 	});
@@ -414,6 +434,8 @@ exports.getcustomerorders = function(req,res){
 			res.json({ success: false, message: 'Nothing was found.' });
 		} else if (order) {
 			console.log('Received Results!! Orders: ' + order);
+			order.success = true;
+			order.message = "Returned Orders";
 			res.json(order);
 		}		
 	});
@@ -1896,7 +1918,9 @@ exports.accountbalance = function(req,res){
 							console.log('Account Info:' + balance);
 							var accountbalance = (+balance.account_balance * -1);
 							balance.account_balance = accountbalance;
-							res.json(balance)
+							balance.success = true;
+							balance.message = 'Account Balance!';
+							res.json(balance);
 						}
 					});		
 		}
@@ -2296,6 +2320,8 @@ exports.getcustomercards = function(req,res){
 						}
 						else if(cards){
 							console.log('Cards:' + cards);
+							cards.success = true;
+							cards.message = 'Enjoy your cards!';
 							res.json(cards);
 						}
 					}
@@ -2315,6 +2341,8 @@ exports.getathlete = function(req,res){
 			res.json({ success: false, message: 'Nothing was found.' });
 		} else if (athlete) {
 			console.log('Received Results: ' + athlete);
+			athlete.success = true;
+			athlete.message = "Athlete Received";
 			res.json(athlete);
 		}		
 	});
