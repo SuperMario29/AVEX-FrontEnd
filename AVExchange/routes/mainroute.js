@@ -372,7 +372,7 @@ exports.nbaboxscorestats = function(req,res){
 		}
 		else if(response){
 			console.log('Received Results: ' + body);
-			res.json({stats: body});
+			res.json(body);
 		}
 	});
 };
@@ -397,9 +397,7 @@ exports.nbaadvancedstats = function(req,res){
 		}
 		else if(response){
 			console.log('Received Results: ' + body);
-			body.success = true;
-			body.message = "Received Results";
-			res.json({stats: body});
+			res.json(body);
 		}
 	});
 };
@@ -712,12 +710,21 @@ var submitorder =  Fiber(function(req){
 									var marketopentime = new Date();
 									var marketclosetime = new Date();
 									marketopentime.setHours(+marketopenhour);
+									marketopentime.setMinutes(0);
+									marketopentime.setSeconds(0);
+									marketopentime.setMilliseconds(0);
 									console.log("Market Open:" + marketopentime);
+									console.log("Market Open (GET TIME):" + marketopentime.getTime());
 									marketclosetime.setHours(+marketclosehour);
+									marketclosetime.setMinutes(0);
+									marketclosetime.setSeconds(0);
+									marketclosetime.setMilliseconds(0);
 									console.log("Market Closed:" + marketclosetime);
+									console.log("Market Closed (GET TIME):" + marketclosetime.getTime());
 									var currentdate = new Date();
 									console.log("Current Time:" + currentdate);
-									if(currentdate.getTime() >= marketopentime.getTime() && currentdate.getTime <= marketclosetime.getTime()){
+									console.log("Current Time (GET TIME):" + currentdate.getTime());
+									if(currentdate.getTime() >= marketopentime.getTime() && currentdate.getTime() <= marketclosetime.getTime()){
 										console.log("Market Is Open!!");
 										isMarketOpen = true;
 									}								    

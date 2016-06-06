@@ -169,14 +169,26 @@ app.get('/isMarketOpen', function(req,res){
 			res.json({ success: false, message: 'Nothing was found.' });
 		} else if (setting) {
 		    console.log('Received Settings: ' + setting);
-		    var marketopenhour = parseInt(setting.marketopen.split(":",1));
-		    var marketclosehour = parseInt(setting.marketclose.split(":",1));
-		    var marketopentime = new Date();
-		    var marketclosetime = new Date();
-		    marketopentime.setHours(+marketopenhour);
-		    marketclosetime.setHours(+marketclosehour);
-		    var currentdate = new Date();
-		    if(currentdate.getTime() >= marketopentime.getTime() && currentdate.getTime <= marketclosetime.getTime()){
+			var marketopenhour = parseInt(setting.marketopen.split(":",1));
+			var marketclosehour = parseInt(setting.marketclose.split(":",1));
+			var marketopentime = new Date();
+			var marketclosetime = new Date();
+			marketopentime.setHours(+marketopenhour);
+			marketopentime.setMinutes(0);
+			marketopentime.setSeconds(0);
+			marketopentime.setMilliseconds(0);
+			console.log("Market Open:" + marketopentime);
+			console.log("Market Open (GET TIME):" + marketopentime.getTime());
+			marketclosetime.setHours(+marketclosehour);
+			marketclosetime.setMinutes(0);
+			marketclosetime.setSeconds(0);
+			marketclosetime.setMilliseconds(0);
+			console.log("Market Closed:" + marketclosetime);
+			console.log("Market Closed (GET TIME):" + marketclosetime.getTime());
+			var currentdate = new Date();
+			console.log("Current Time:" + currentdate);
+			console.log("Current Time (GET TIME):" + currentdate.getTime());
+		    if(currentdate.getTime() >= marketopentime.getTime() && currentdate.getTime() <= marketclosetime.getTime()){
 				res.json({ success: true, message: 'Open' });
 		    }
 		    else{
