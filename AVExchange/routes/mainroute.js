@@ -232,37 +232,37 @@ exports.updatecustomer =  function(req,res){
 						console.log('Email is available');
 						console.log('Updated User Account succeed');
 						stripe.customers.update(user.stripeaccount, {
-							  email: email
-							}, function(err, customer) {
-							  if(err){throw err;}
-							  if(!customer){
-								  user.name = name;
-								  user.listofcustomerhistory.push({
-										description: 'Account update failed.Unable To Locate Stripe Account',
-										actiontype: 'Update Account',
-										recordstatusdate: new Date(),
-										recordstatus: 1
-									});
-									user.save(function(err) {
-										if (err) {throw err;}	
-									});
-									res.json({ success: false, message: 'Updated User Account failed' });
-							  }
-							  else if(customer){
-									user.emailaddress = email;
-									user.name = name;
-									user.listofcustomerhistory.push({
-										description: 'Account update succeed',
-										actiontype: 'Update Account',
-										recordstatusdate: new Date(),
-										recordstatus: 1
-									});
-									user.save(function(err) {
-										if (err) {throw err;}	
-									});
-									res.json({ success: true, message: 'Updated User Account successfully' });
-							  }
-							});
+							email: email
+						}, function(err, customer) {
+							if(err){throw err;}
+							if(!customer){
+								user.name = name;
+								user.listofcustomerhistory.push({
+									description: 'Account update failed.Unable To Locate Stripe Account',
+									actiontype: 'Update Account',
+									recordstatusdate: new Date(),
+									recordstatus: 1
+								});
+								user.save(function(err) {
+									if (err) {throw err;}	
+								});
+								res.json({ success: false, message: 'Updated User Account failed' });
+							}
+							else if(customer){
+								user.emailaddress = email;
+								user.name = name;
+								user.listofcustomerhistory.push({
+									description: 'Account update succeed',
+									actiontype: 'Update Account',
+									recordstatusdate: new Date(),
+									recordstatus: 1
+								});
+								user.save(function(err) {
+									if (err) {throw err;}	
+								});
+								res.json({ success: true, message: 'Updated User Account successfully' });
+							}
+						});
 
 					} else if (user) {
 						console.log('Email is not available');
@@ -541,7 +541,7 @@ var cancelorder =  Fiber(function(req){
 	var availableshares = 0.00;
 	var totalshares = 0.00;
 	var orderid = req.body.orderid.trim();
-	
+
 	console.log('Cancelling Order:' + orderid);
 
 	customers.findById(req.decoded._doc._id, function(err, user) {
@@ -684,68 +684,69 @@ var submitorder =  Fiber(function(req){
 		} else if (user) {
 			console.log('User found!');
 
-			stripe.customers.retrieve(
-					user.stripeaccount,
-					function(err, balance) {
-						if (err){throw err;}
-						if(!balance){
-							console.log('Balance Was Not found');
-						}
-						else if(balance){
-							console.log('Account Info:' + balance);
-							var accountbalance = (+balance.account_balance * -1) / 100;
-							// find by some conditions and update
-							settings.findOne(function(err, setting) {
-								if (err) {throw err;}
-								if (!setting) {
-									console.log('Commission Was Not found');
-								} else if (setting) {
-									console.log('Received Settings: ' + setting);
-									console.log('Received Setting Commission: ' + setting.commission);
-									finalcommission = setting.commission;
-									console.log('Commission: ' + finalcommission);
-									console.log('Received Settings: ' + setting);
-									var marketopenhour = parseInt(setting.marketopen.split(":",1));
-									var marketclosehour = parseInt(setting.marketclose.split(":",1));
-									var marketopentime = new Date();
-									var marketclosetime = new Date();
-									marketopentime.setHours(+marketopenhour);
-									marketopentime.setMinutes(0);
-									marketopentime.setSeconds(0);
-									marketopentime.setMilliseconds(0);
-									console.log("Market Open:" + marketopentime);
-									console.log("Market Open (GET TIME):" + marketopentime.getTime());
-									marketclosetime.setHours(+marketclosehour);
-									marketclosetime.setMinutes(0);
-									marketclosetime.setSeconds(0);
-									marketclosetime.setMilliseconds(0);
-									console.log("Market Closed:" + marketclosetime);
-									console.log("Market Closed (GET TIME):" + marketclosetime.getTime());
-									var currentdate = new Date();
-									console.log("Current Time:" + currentdate);
-									console.log("Current Time (GET TIME):" + currentdate.getTime());
-									if(currentdate.getTime() >= marketopentime.getTime() && currentdate.getTime() <= marketclosetime.getTime()){
-										console.log("Market Is Open!!");
-										isMarketOpen = true;
-									}								    
-									else{
-										console.log("Market Is Closed!!");
-									}
+			// find by some conditions and update
+			settings.findOne(function(err, setting) {
+				if (err) {throw err;}
+				if (!setting) {
+					console.log('Commission Was Not found');
+				} else if (setting) {
+					console.log('Received Settings: ' + setting);
+					console.log('Received Setting Commission: ' + setting.commission);
+					finalcommission = setting.commission;
+					console.log('Commission: ' + finalcommission);
+					console.log('Received Settings: ' + setting);
+					var marketopenhour = parseInt(setting.marketopen.split(":",1));
+					var marketclosehour = parseInt(setting.marketclose.split(":",1));
+					var marketopentime = new Date();
+					var marketclosetime = new Date();
+					marketopentime.setHours(+marketopenhour);
+					marketopentime.setMinutes(0);
+					marketopentime.setSeconds(0);
+					marketopentime.setMilliseconds(0);
+					console.log("Market Open:" + marketopentime);
+					console.log("Market Open (GET TIME):" + marketopentime.getTime());
+					marketclosetime.setHours(+marketclosehour);
+					marketclosetime.setMinutes(0);
+					marketclosetime.setSeconds(0);
+					marketclosetime.setMilliseconds(0);
+					console.log("Market Closed:" + marketclosetime);
+					console.log("Market Closed (GET TIME):" + marketclosetime.getTime());
+					var currentdate = new Date();
+					console.log("Current Time:" + currentdate);
+					console.log("Current Time (GET TIME):" + currentdate.getTime());
+					if(currentdate.getTime() >= marketopentime.getTime() && currentdate.getTime() <= marketclosetime.getTime()){
+						console.log("Market Is Open!!");
+						isMarketOpen = true;
+					}								    
+					else{
+						console.log("Market Is Closed!!");
+					}
+					athletes.findOne({quote: quote},function(err,athlete){
+						if (err) {throw err;}
+						if (!athlete) {
+							console.log('Athlete Was Not found');
+						} else if (athlete) {
 
-									athletes.findOne({quote: quote},function(err,athlete){
-										if (err) {throw err;}
-										if (!athlete) {
-											console.log('Athlete Was Not found');
-										} else if (athlete) {
-											var currentqueue = athletes.findOneAndUpdate(
-													{ _id: athlete._id },
-													{ $inc : { 'nextqueue' : 1 } });
-											var userqueueposition = currentqueue.nextqueue;
+							var currentqueue = athletes.findOneAndUpdate(
+									{ _id: athlete._id },
+									{ $inc : { 'nextqueue' : 1 } });
+							var userqueueposition = currentqueue.nextqueue;
 
-											while (userqueueposition != currentqueue.currentqueue){
-												var currentqueue = athletes.findById(athlete._id);
-												sleep(1000);
-											}
+							while (userqueueposition != currentqueue.currentqueue){
+								var currentqueue = athletes.findById(athlete._id);
+								sleep(1000);
+							}
+
+							stripe.customers.retrieve(
+									user.stripeaccount,
+									function(err, balance) {
+										if (err){throw err;}
+										if(!balance){
+											console.log('Balance Was Not found');
+										}
+										else if(balance){
+											console.log('Account Info:' + balance);
+											var accountbalance = (+balance.account_balance * -1) / 100;
 
 											console.log('Received Price: ' + athlete.currentprice);
 											finalprice = athlete.currentprice;
@@ -1901,17 +1902,11 @@ var submitorder =  Fiber(function(req){
 												}).sort({recordstatusdate : 1});	
 											}
 										}
-										else{
-											console.log('Order was not valid');
-											athletes.findOneAndUpdate(
-													{ _id: athlete._id },
-													{ $inc : { 'currentqueue' : 1 } });
-										}
 									});
-								}
-							}); 
 						}
 					});
+				}
+			}); 
 		}
 	});
 });
