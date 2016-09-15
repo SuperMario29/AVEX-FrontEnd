@@ -2368,8 +2368,6 @@ exports.getathlete = function(req,res){
 			res.json({ success: false, message: 'Nothing was found.' });
 		} else if (athlete) {
 			console.log('Received Results: ' + athlete);
-			athlete.success = true;
-			athlete.message = "Athlete Received";
 			res.json({
 				success: true,
 				message: "Athlete Received",
