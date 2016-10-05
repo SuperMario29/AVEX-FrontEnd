@@ -305,7 +305,8 @@ exports.market = function(req,res){
 //Find Athletes That Match the Search Request
 exports.search = function(req,res){
 	console.log('Get Search');
-	athletes.find({$or: [{name:  { $regex: new RegExp("^"+req.query.search.replace("+"," "), "i") }}, {firstname:  { $regex: new RegExp("^"+req.query.search.replace("+"," "), "i") }}, {lastname:  { $regex: new RegExp("^"+req.query.search.replace("+"," "), "i") }} ] }, function(err, athlete) {
+	//athletes.find({$or: [{name:  { $regex: new RegExp("^"+req.query.search.replace("+"," "), "i") }}, {firstname:  { $regex: new RegExp("^"+req.query.search.replace("+"," "), "i") }}, {lastname:  { $regex: new RegExp("^"+req.query.search.replace("+"," "), "i") }} ] }, function(err, athlete) {
+	athletes.find({$and : [{'isavailable': true}, {$or: [{name:  { $regex: new RegExp("^"+req.query.search.replace("+"," "), "i") }}, {firstname:  { $regex: new RegExp("^"+req.query.search.replace("+"," "), "i") }}, {lastname:  { $regex: new RegExp("^"+req.query.search.replace("+"," "), "i") }} ] }]}, function(err, athlete) {
 		if (err) {throw err;}
 		if (!athlete) {
 			console.log('Nothing was found');
@@ -335,7 +336,9 @@ exports.search = function(req,res){
 //Get Athlete Quotes
 exports.quotes =  function(req,res){
 	console.log('Get Quotes');
-	athletes.find({ quote: { $ne: null }},'quote name currentprice', function(err, quotes) {
+	//athletes.find({ quote: { $ne: null }},'quote name currentprice', function(err, quotes) {
+	athletes.find({$and: [{'isavailable': true}, { quote: { $ne: null }}]},'quote name currentprice', function(err, quotes) {
+
 		if (err) {throw err;}
 		if (!quotes) {
 			console.log('Nothing was found');
@@ -574,7 +577,6 @@ var cancelorder =  Fiber(function(req){
 								var currentqueue = athletes.findById(athlete._id);
 								sleep(1000);
 							}
-
 
 							console.log('Received Price: ' + athlete.currentprice);
 							finalprice = athlete.currentprice;
